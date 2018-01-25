@@ -1,0 +1,26 @@
+<Context>
+    <Parameter name="KeystoreFile" value="C:/Bitspinners/ria-eidas/eeidpkeys/eeidp.jks" override="false"/>
+    <Parameter name="KeystorePassword" value="changeit" override="false"/>
+
+    <Parameter name="TokenExpiration" value="200" override="false"/>
+    <Parameter name="DigiDocServiceUrl" value="https://tsp.demo.sk.ee" override="false"/>
+    <Parameter name="DigiDocServiceName" value="Testimine" override="false"/>
+
+    <Parameter name="BaseUrl" value="https://mk/IdP" override="false"/>
+
+    <Parameter name="TechnicalContactGivenName" value="Hwi" override="false"/>
+    <Parameter name="TechnicalContactSurname" value="Noree" override="false"/>
+    <Parameter name="TechnicalContactPhone" value="+37250123" override="false"/>
+    <Parameter name="TechnicalContactEmail" value="hwi@noree.com" override="false"/>
+    <Parameter name="TechnicalContactCompanyName" value="Prince Ltd." override="false"/>
+
+    <Parameter name="SupportContactGivenName" value="Mati" override="false"/>
+    <Parameter name="SupportContactSurname" value="Estrasdosdes" override="false"/>
+    <Parameter name="SupportContactPhone" value="+37250321" override="false"/>
+    <Parameter name="SupportContactEmail" value="estrasdosdes@facebook.com" override="false"/>
+    <Parameter name="SupportContactCompanyName" value="Fakebook AS" override="false"/>
+
+    <Parameter name="OrganizationName" value="RIA" override="false"/>
+    <Parameter name="OrganizationDisplayName" value="RIA" override="false"/>
+    <Parameter name="OrganizationUrl" value="http://ria.ee" override="false"/>
+</Context>
