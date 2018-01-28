@@ -40,6 +40,8 @@ import eu.eidas.auth.commons.protocol.IAuthenticationRequest;
 import eu.eidas.auth.commons.protocol.IResponseMessage;
 import eu.eidas.engine.exceptions.EIDASSAMLEngineException;
 import org.bouncycastle.util.encoders.Base64;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,6 +71,8 @@ public class IdPMainController {
 
     private String baseUrl;
 
+    private DateTimeFormatter dateFormatter;
+
     public IdPMainController(MetaDataI metaDataI, EidasIdPI eidasIdPI,
                              MobileIDAuthI mobileIDAuthI,
                              @Value("${TokenExpiration: 200}") long tokenExpiration,
@@ -82,6 +86,8 @@ public class IdPMainController {
                 .build();
 
         this.baseUrl = baseUrl;
+
+        dateFormatter = DateTimeFormat.forPattern("dd.MM.yyyy");
     }
 
     @GetMapping(value="/metadata", produces = "application/xml; charset=utf-8")
@@ -113,20 +119,14 @@ public class IdPMainController {
                                Model model) throws InvalidAuthRequest {
         IAuthenticationRequest authenticationRequest = eidasIdPI.parseRequest(SAMLRequest);
 
-        model.addAttribute( "responseCallback", authenticationRequest.getAssertionConsumerServiceURL());
-
         EENaturalPerson naturalPerson;
         try {
             X509Certificate clientCert = readClientCertificate(request);
             naturalPerson = parseClientCertificate(clientCert);
         } catch (IdCardNotFound idCardNotFound) {
-            model.addAttribute("SAMLResponse", eidasIdPI.buildErrorResponse(authenticationRequest));
-            model.addAttribute( "exception", idCardNotFound);
-            return "noidcard";
+            return fillErrorInfo(model, SAMLRequest, authenticationRequest,idCardNotFound,"error.idcard.notfound", lang);
         } catch (InvalidAuthData invalidAuthData) {
-            model.addAttribute("SAMLResponse", eidasIdPI.buildErrorResponse(authenticationRequest));
-            model.addAttribute( "exception", invalidAuthData);
-            return "invalidauth";
+            return fillErrorInfo(model, SAMLRequest, authenticationRequest, invalidAuthData, "error.general", lang);
         }
 
         //EENaturalPerson naturalPerson = new EENaturalPerson("Kiilaspea", "Mati",
@@ -136,8 +136,36 @@ public class IdPMainController {
 
         model.addAttribute("lang", lang);
         model.addAttribute("SAMLResponse", response);
+        model.addAttribute( "responseCallback", authenticationRequest.getAssertionConsumerServiceURL());
 
+        addPersonAttributes(model, naturalPerson);
         return "authorize";
+    }
+
+    private String fillErrorInfo(Model model, String originalRequest, IAuthenticationRequest authenticationRequest, Exception exception,
+                                 String errorMessageCode, String lang) {
+        if(authenticationRequest != null) {
+            model.addAttribute( "SAMLRequest", originalRequest);
+            model.addAttribute("SAMLResponse", eidasIdPI.buildErrorResponse(authenticationRequest));
+            model.addAttribute( "responseCallback", authenticationRequest.getAssertionConsumerServiceURL());
+        }
+        else {
+            model.addAttribute( "SAMLRequest", "");
+            model.addAttribute("SAMLResponse", "");
+            model.addAttribute( "responseCallback", "");
+        }
+        model.addAttribute("exception", exception);
+        model.addAttribute("lang", lang);
+        model.addAttribute( "errorMessageCode", errorMessageCode);
+
+        return "error";
+    }
+
+    private void addPersonAttributes(Model model, EENaturalPerson naturalPerson) {
+        model.addAttribute("personalCode", naturalPerson.getIdCode());
+        model.addAttribute( "surName", naturalPerson.getFamilyName());
+        model.addAttribute( "name", naturalPerson.getFirstName());
+        model.addAttribute( "birthDate", dateFormatter.print(naturalPerson.getBirthDate()));
     }
 
     private X509Certificate readClientCertificate(HttpServletRequest request) throws IdCardNotFound, InvalidAuthData {
@@ -223,20 +251,22 @@ public class IdPMainController {
                                     Model model) throws InvalidAuthRequest {
         IAuthenticationRequest authenticationRequest = eidasIdPI.parseRequest(SAMLRequest);
 
+        if(phoneNumber == null) {
+            return fillErrorInfo(model, SAMLRequest, authenticationRequest, null, "error.phone.number",lang);
+        }
+
         MobileIDSession mobileIDSession;
         try {
             mobileIDSession = mobileIDAuth.startMobileIdAuth(phoneNumber);
         } catch (MobileIdError mobileIdError) {
-            model.addAttribute( "responseCallback", authenticationRequest.getAssertionConsumerServiceURL());
-            model.addAttribute("SAMLResponse", eidasIdPI.buildErrorResponse(authenticationRequest));
-            model.addAttribute( "exception", mobileIdError);
-            return "miderror";
+            return fillErrorInfo(model, SAMLRequest, authenticationRequest,mobileIdError,"error.mobileid", lang);
         }
 
-        IdPTokenCacheItem cacheItem = new IdPTokenCacheItem(authenticationRequest, mobileIDSession);
+        IdPTokenCacheItem cacheItem = new IdPTokenCacheItem(SAMLRequest, authenticationRequest, mobileIDSession);
         String sessionToken = String.valueOf(cacheItem.getMobileIDSession().sessCode);
         tokenCache.put(sessionToken, cacheItem);
 
+        model.addAttribute("lang", lang);
         model.addAttribute( "sessionToken", sessionToken);
         model.addAttribute( "challenge", mobileIDSession.challenge);
         model.addAttribute( "checkUrl", baseUrl + "/midstatus?sessionToken=" + cacheItem.getMobileIDSession().sessCode);
@@ -247,11 +277,9 @@ public class IdPMainController {
     public String showMobileIdCheck(@RequestParam(required = false) String sessionToken,
                                     @RequestParam(required = false) String lang,
                                     Model model) {
-        model.addAttribute("lang", lang);
-
         IdPTokenCacheItem cacheItem = tokenCache.getIfPresent(sessionToken);
         if(cacheItem==null) {
-            return "error";
+            return "fatal_error";
         }
 
         if(!cacheItem.getCompleted()) {
@@ -263,16 +291,10 @@ public class IdPMainController {
                     return "midwait";
                 }
             } catch (MobileIdError mobileIdError) {
-                model.addAttribute("responseCallback", cacheItem.getSamlRequest().getAssertionConsumerServiceURL());
-                model.addAttribute("SAMLResponse", eidasIdPI.buildErrorResponse(cacheItem.getSamlRequest()));
-                model.addAttribute("exception", mobileIdError);
-                return "miderror";
+                return fillErrorInfo(model, cacheItem.getOriginalRequest(), cacheItem.getSamlRequest(),mobileIdError,"error.mobileid", lang);
             }
         } else if(cacheItem.getError()!=null) {
-            model.addAttribute("responseCallback", cacheItem.getSamlRequest().getAssertionConsumerServiceURL());
-            model.addAttribute("SAMLResponse", eidasIdPI.buildErrorResponse(cacheItem.getSamlRequest()));
-            model.addAttribute("exception", cacheItem.getError());
-            return "miderror";
+            return fillErrorInfo(model, cacheItem.getOriginalRequest(), cacheItem.getSamlRequest(),cacheItem.getError(),"error.mobileid", lang);
         }
 
         EENaturalPerson naturalPerson;
@@ -281,15 +303,16 @@ public class IdPMainController {
                     cacheItem.getMobileIDSession().firstName, cacheItem.getMobileIDSession().personalCode);
 
         } catch (InvalidAuthData invalidAuthData) {
-            model.addAttribute("SAMLResponse", eidasIdPI.buildErrorResponse(cacheItem.getSamlRequest()));
-            model.addAttribute( "exception", invalidAuthData);
-            return "invalidauth";
+            return fillErrorInfo(model, cacheItem.getOriginalRequest(), cacheItem.getSamlRequest(), invalidAuthData, "error.general", lang);
         }
 
         String response = eidasIdPI.buildAuthenticationResponse(cacheItem.getSamlRequest(),naturalPerson);
 
         model.addAttribute("SAMLResponse", response);
         model.addAttribute( "responseCallback", cacheItem.getSamlRequest().getAssertionConsumerServiceURL());
+        model.addAttribute("lang", lang);
+
+        addPersonAttributes(model, naturalPerson);
 
         return "authorize";
     }

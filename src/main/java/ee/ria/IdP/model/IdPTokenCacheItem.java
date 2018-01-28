@@ -34,15 +34,21 @@ import org.joda.time.DateTime;
  * Model object holding data about ongoing mobile id sessions
  */
 public class IdPTokenCacheItem {
+    private String originalRequest;
     private IAuthenticationRequest samlRequest;
     private MobileIDSession mobileIDSession;
 
     private boolean completed = false;
     private MobileIdError error = null;
 
-    public IdPTokenCacheItem(IAuthenticationRequest samlRequest, MobileIDSession mobileIDSession) {
+    public IdPTokenCacheItem(String originalRequest, IAuthenticationRequest samlRequest, MobileIDSession mobileIDSession) {
+        this.originalRequest = originalRequest;
         this.samlRequest = samlRequest;
         this.mobileIDSession = mobileIDSession;
+    }
+
+    public String getOriginalRequest() {
+        return originalRequest;
     }
 
     public IAuthenticationRequest getSamlRequest() {

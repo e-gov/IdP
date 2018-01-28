@@ -48,10 +48,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
@@ -72,6 +69,13 @@ import java.util.Properties;
 @ComponentScan(basePackages = "ee.ria.IdP")
 public class IdPConfig extends WebMvcConfigurerAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(IdPConfig.class);
+
+    // equivalents for <mvc:resources/> tags
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/static/**").addResourceLocations("/static/");
+        //registry.addResourceHandler("/static/*").addResourceLocations("/resources/static/");
+    }
 
     @Bean
     public ViewResolver viewResolver() {

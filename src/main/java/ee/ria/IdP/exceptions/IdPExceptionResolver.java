@@ -38,10 +38,7 @@ import java.util.Properties;
 public class IdPExceptionResolver extends SimpleMappingExceptionResolver {
     public IdPExceptionResolver() {
         Properties mappings = new Properties();
-
-        mappings.setProperty("InvalidAuthRequest", "invalidauth");
-
         setExceptionMappings(mappings);  // None by default
-        setDefaultErrorView("error");    // No default
+        setDefaultErrorView("fatal_error");    // No default
     }
 }
