@@ -1,0 +1,144 @@
+/* 
+   Standardne laadileht, kasutusel repodes: TARA-Doku, eIDAS-Connector
+*/
+
+/*#region Paigutus */
+body {
+    max-width: 60em;
+    margin: 0 0; 
+    padding: 0.6em 1.5em 2em 2em; 
+    font-family: 'Segoe UI', Arial, serif;
+    font-size: 16px; 
+    color: #24292E !important;
+    line-height: 1.5 !important;
+    }
+  
+  /* Päis */
+  .pais { font-family: 'Anonymous Pro', sans-serif;
+    font-size: 13pt; margin-bottom: 8px; }
+  
+  #Tekst { width: 55rem; }
+  
+  /* ---- Avalehe paigutus ---- */  
+  #Container { display: flex; max-width: 60em; }
+  #Avatekst {
+    flex-grow: 1; margin-left: 2rem;
+    max-width: 63rem; /* Teksti loetavuse huvides */
+  }  
+  /*#endregion */
+  
+  /*#region Pealkirjad */
+  h1 {
+    font-size: 32px !important;
+    font-family: 'Segoe UI Semibold', Arial, Helvetica, sans-serif;
+    margin-top: 1em;
+    margin-bottom: 1rem;
+  }
+  h2 {
+    font-size: 24px !important;
+    font-family: 'Segoe UI Semibold', Arial, Helvetica, sans-serif;
+    margin-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  h3 {
+    font-size: 12pt !important;
+    font-weight: bold;
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  /*#endregion */
+  
+  /*#region Tekst */
+  p { margin: 0 0 1em 0; }
+  
+  .vaike { font-size: 9pt; }
+  
+  /* Allkriipsutus */
+  .u { text-decoration: underline; }
+  
+  /*#endregion */
+  
+  /*#region Loetelud */
+  #Tekst > ul {
+    list-style-type: '-  ';
+    margin: 0 0 1em 0;
+    padding-left: 1em;
+  }  
+  #Tekst > ol {
+    padding-left: 1em;
+  }  
+  /*#endregion */
+  
+  /*#region TOC genereeritud === */
+  #markdown-toc { padding-left: 0 !important; }
+  #markdown-toc li:before {
+      content: none !important;
+      margin-left: 0 !important;
+  }    
+  #markdown-toc > li {
+    list-style: none;
+  }  
+  /*#endregion */
+  
+  /*#region Tabelid */
+  table { width: 100%; margin: 0 4em 2em 0; }
+  table { border-collapse: collapse; }    
+  table, th, td { border: 1px solid black; }
+  th, td { padding: 2px; }
+  th { font-weight: normal; font-style: italic; text-align: center; }
+  /*#endregion */
+  
+  /*#region Kood; asciiflow joonised */
+  pre, code, samp {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 16px;
+    color: darkslategray !important;
+    overflow-y: hidden; overflow-x: scroll;
+    page-break-inside: avoid; hyphens: none;
+    text-transform: none;
+  }
+  pre code,
+  code code {
+    font-size: 100%;
+  }
+  pre { margin-top: 1em; margin-bottom: 1em; }
+  /*#endregion */
+  
+  /*#region Lingid */
+  a[href] {
+    color: #607D8B;
+    text-decoration: none;
+    border-bottom: 1px dotted #607D8B;
+    padding: 0 1px 0;
+    margin: 0 -1px 0;
+  }
+  a:visited {
+    border-bottom-color: #607D8B;
+  }
+  
+  a[href]:focus,
+  a[href]:hover {
+    background: #607D8B;
+    background: rgba(75%, 75%, 75%, .25);
+    border-bottom-width: 3px;
+    margin-bottom: -2px;
+  }
+  /*#endregion */
+  
+  /*#region Paneelid */
+  .silt { 
+    border-radius: 4px; padding: 0.2rem 0.3rem;
+    border-color: DarkCyan;
+    background-color: Azure;
+    color: Teal;
+    text-align: center;
+  }
+  .teade {
+    border-radius: 2px; padding: 0.1rem;
+    color: Cadetblue;
+    background-color: lightcyan;
+  }
+  
+  /*#endregion */
+  
