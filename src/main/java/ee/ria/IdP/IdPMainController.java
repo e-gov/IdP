@@ -264,13 +264,18 @@ public class IdPMainController {
 
         IdPTokenCacheItem cacheItem = new IdPTokenCacheItem(SAMLRequest, authenticationRequest, mobileIDSession);
         String sessionToken = String.valueOf(cacheItem.getMobileIDSession().sessCode);
-        tokenCache.put(sessionToken, cacheItem);
+        putCacheItem(cacheItem,sessionToken);
 
         model.addAttribute("lang", lang);
         model.addAttribute( "sessionToken", sessionToken);
         model.addAttribute( "challenge", mobileIDSession.challenge);
         model.addAttribute( "checkUrl", baseUrl + "/midstatus?sessionToken=" + cacheItem.getMobileIDSession().sessCode);
         return "midwait";
+    }
+
+    // needed for test so not private
+    void putCacheItem(IdPTokenCacheItem cacheItem, String sessionToken) {
+        tokenCache.put(sessionToken,cacheItem);
     }
 
     @PostMapping(value="/midcheck")
@@ -323,6 +328,9 @@ public class IdPMainController {
         IdPTokenCacheItem cacheItem = tokenCache.getIfPresent(sessionToken);
         if(cacheItem==null)
             return "ERROR";
+
+        if(cacheItem.getCompleted())
+            return "OK";
 
         try {
             if(!mobileIDAuth.checkMobileIdAuth(cacheItem))
