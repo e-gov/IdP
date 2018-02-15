@@ -124,9 +124,7 @@ Meetodiga `readClientCertificate` loetakse ID-kaardilt sert. Seejärel meetodiga
 
 Vastus koostatakse meetodis `buildAuthenticationResponse`. Meetodis kasutatakse eIDAS-tarkvara. Meetod ise on suhteliselt lühike.
 
-Praegu tagastakse neli kohustuslikku atribuuti (isikukood, ees- ja perekonnanimi, sünniaeg). // NB! See viitab veelkord ebaselgusele, kas kohustuslikke atribuute peab küsima ja kas kohustuslikke atribuute, mida ei küsita, peab väljastama (või tohib väljastada)). //
-
-// Äriregistri päringut praegu teostatud ei ole, kuid repos on SOAP teegid, ilmselt selleks otstarbeks. (Arhitektuuriline küsimus: kas X-teed siia tihedalt külge keevitada?) //
+Praegu tagastakse neli kohustuslikku atribuuti (isikukood, ees- ja perekonnanimi, sünniaeg).
 
 ## Krüpto
 
