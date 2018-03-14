@@ -63,7 +63,7 @@
     <!-- FOOTER -->
     <div class="footer">
         <div class="funding">
-            <p><img src="static/logo-europe.svg" alt=""><spring:message code="html.funding.1"/><br><spring:message code="html.funding.2"/></p>
+            <p><img src="static/logo-europe.png" alt=""><spring:message code="html.funding.1"/><br><spring:message code="html.funding.2"/></p>
         </div>
         <div class="ria">
             <p><spring:message code="html.ria.name"/>, <a href="mailto:help@ria.ee">help@ria.ee</a>, <a href="http://www.ria.ee" target="_blank">www.ria.ee</a></p>
