@@ -8,7 +8,7 @@
         xmlHttp.onreadystatechange = function() {
             if (xmlHttp.readyState == 4)
                 if(xmlHttp.status == 200 && xmlHttp.responseText == "WAIT")
-                    window.setTimeout(checkResult(),5000);
+                    window.setTimeout(checkResult,5000);
                 else
                     document.getElementById("midcheck").submit();
         }
