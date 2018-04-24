@@ -12,7 +12,8 @@
                 else
                     document.getElementById("midcheck").submit();
         }
-        xmlHttp.open("GET", "${checkUrl}", true);
+        // dummy ts parameter is needed to overcome IE caching
+        xmlHttp.open("GET", "${checkUrl}&ts=" + Date.now(), true);
         xmlHttp.send(null);
     }
     window.onload=function(){
