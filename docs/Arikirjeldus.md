@@ -10,4 +10,4 @@ Teenuse ärikasutaja on välisriigi e-teenuse haldaja. E-teenus peab olema ühen
 
 Teenuse lõppkasutaja on Eesti ID-kaardi või mobiil-ID kasutaja, kes tahab kasutada autentimist nõudvat välisriigi e-teenust.
 
-[Tehniline kirjeldus](TehnilineKirjeldus)
+[Tehniline kirjeldus](TehnilineKirjeldus.md)
