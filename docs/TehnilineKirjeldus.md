@@ -12,7 +12,7 @@ Märkus. Lahtised küsimused on markeeritud sümbolitega //.
 
 ## Ülevaade
 
-[https://github.com/ria-eidas/IdP](https://github.com/ria-eidas/IdP)
+[https://github.com/e-gov/IdP](https://github.com/e-gov/IdP)
 
 "Eesti autentimisteenus" on Riigi Infosüsteemi Ameti (RIA) eIDAS sõlme (_Node_) külge ühendatud rakendus, eIDAS-e terminoloogias _identity provider_, mis autendib välisriigist autentimisele suunatud Eesti ID-kaardi või m-ID kasutaja.
 
