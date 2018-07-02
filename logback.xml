@@ -16,6 +16,11 @@
 		<level value="DEBUG" />
 	</logger>
 
+	<!-- To see internal servlet exceptions which are logged as debug -->
+	<!--<logger name="org.springframework.web.servlet.DispatcherServlet">
+		<level value="DEBUG" />
+	</logger>-->
+
 	<root>
 		<appender-ref ref="STDOUT" />
 		<level value="INFO" />
