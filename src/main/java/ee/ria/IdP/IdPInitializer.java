@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
@@ -50,6 +51,11 @@ public class IdPInitializer extends AbstractAnnotationConfigDispatcherServletIni
     @Override
     protected Class<?>[] getServletConfigClasses() {
         return new Class<?>[] {IdPConfig.class};
+    }
+
+    @Override
+    protected Filter[] getServletFilters() {
+        return new Filter[] {new IdPLoggingMDCServletFilter()};
     }
 
     @Override
