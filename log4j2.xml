@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="30">
+
+    <Properties>
+        <Property name="idp.log.instanceId">eeIdP</Property>
+        <Property name="idp.log.dir">/opt/tomcat/logs</Property>
+        <Property name="idp.log.pattern">{&quot;date&quot;:&quot;%d{yyyy-MM-dd'T'HH:mm:ss,SSSZ}&quot;, &quot;level&quot;:&quot;%level&quot;%notEmpty{, &quot;request&quot;:&quot;%enc{%X{request}}{JSON}&quot;}%notEmpty{, &quot;requestId&quot;:&quot;%X{requestId}&quot;}%notEmpty{, &quot;sessionId&quot;:&quot;%X{sessionId}&quot;}, &quot;logger&quot;:&quot;%logger&quot;, &quot;thread&quot;:&quot;%thread&quot;, &quot;instance&quot;:&quot;${sys:idp.log.instanceId}&quot;, &quot;message&quot;:&quot;%enc{%message}{JSON}&quot;%notEmpty{, &quot;throwable&quot;:&quot;%enc{%throwable}{JSON}&quot;}}%n</Property>
+
+        <!-- Pattern for syslog appender; uncomment when using syslog appender -->
+        <!--<Property name="idp.syslog.pattern">&lt;13&gt;1 %d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} ${hostName} rak-eeIdP - - - ${sys:idp.log.pattern}</Property>-->
+    </Properties>
+
+    <Appenders>
+        <RollingFile name="idpFile" fileName="${sys:idp.log.dir}/IdP.log" append="true"
+                     filePattern="${sys:idp.log.dir}/$${date:yyyy-MM}/IdP-%d{yyyy-MM-dd}-%i.log.gz">
+
+            <PatternLayout charset="UTF-8" pattern="${sys:idp.log.pattern}" alwaysWriteExceptions="false"/>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+
+        <!-- Example of an appender for sending log events to syslog; uncomment to apply -->
+        <!--<Socket name="idpSyslog" host="log-server-host" port="log-server-port" protocol="SSL">
+            <PatternLayout charset="UTF-8" pattern="${sys:idp.syslog.pattern}" alwaysWriteExceptions="false"/>
+            <SSL>
+                <KeyStore location="path-to-keystore" password="changeit"/>
+                <TrustStore location="path-to-truststore" password="changeit"/>
+            </SSL>
+        </Socket>-->
+    </Appenders>
+
+    <Loggers>
+        <Logger name="ee.ria.IdP" level="INFO" additivity="false">
+            <AppenderRef ref="idpFile"/>
+
+            <!-- Uncomment when using syslog appender and wanting to send ee.ria.IdP events to syslog -->
+            <!--<AppenderRef ref="idpSyslog"/>-->
+        </Logger>
+
+        <Root level="WARN">
+            <AppenderRef ref="idpFile"/>
+
+            <!-- Uncomment when using syslog appender and wanting to send non ee.ria.IdP events to syslog -->
+            <!--<AppenderRef ref="idpSyslog"/>-->
+        </Root>
+    </Loggers>
+
+</Configuration>

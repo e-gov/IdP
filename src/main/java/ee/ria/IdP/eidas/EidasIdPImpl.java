@@ -107,6 +107,10 @@ public class EidasIdPImpl implements EidasIdPI {
             throw new InvalidAuthRequest("invalid.samlrequest");
         }
 
+        LOG.info("SAML request ID: " + authRequest.getId());
+        if (LOG.isDebugEnabled())
+            LOG.debug(authRequest.toString());
+
         checkRequestAttributes(authRequest);
 
         authRequest = addRequestCallback(authRequest);
@@ -207,12 +211,17 @@ public class EidasIdPImpl implements EidasIdPI {
         authResponse.attributes(attributes);
 
         AuthenticationResponse authenticationResponse = authResponse.build();
+
+        LOG.info("SAML response ID: " + authenticationResponse.getId());
+        if (LOG.isDebugEnabled())
+            LOG.debug(authenticationResponse.toString());
+
         try {
             IResponseMessage responseMessage = protocolEngine.generateResponseMessage(authRequest, authenticationResponse,
                     protocolEngine.getSigner().isResponseSignAssertions(), "127.0.0.1");
             return new String(Base64.encode(responseMessage.getMessageBytes()));
         } catch (EIDASSAMLEngineException e) {
-            LOG.error("Could not build saml errorresponse", e);
+            LOG.error("Could not build SAML authentication response message", e);
             throw new RuntimeException("saml.error");
         }
     }
@@ -236,7 +245,7 @@ public class EidasIdPImpl implements EidasIdPI {
                     authRequest, authenticationResponse, "127.0.0.1");
             return new String(Base64.encode(responseMessage.getMessageBytes()));
         } catch (EIDASSAMLEngineException e) {
-            LOG.error("Could not build saml errorresponse", e);
+            LOG.error("Could not build SAML error response message", e);
             throw new RuntimeException("saml.error");
         }
     }
