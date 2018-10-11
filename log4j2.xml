@@ -3,11 +3,11 @@
 
     <Properties>
         <Property name="idp.log.instanceId">eeIdP</Property>
-        <Property name="idp.log.dir">/opt/tomcat/logs</Property>
+        <Property name="idp.log.dir">/var/log/</Property>
         <Property name="idp.log.pattern">{&quot;date&quot;:&quot;%d{yyyy-MM-dd'T'HH:mm:ss,SSSZ}&quot;, &quot;level&quot;:&quot;%level&quot;%notEmpty{, &quot;request&quot;:&quot;%enc{%X{request}}{JSON}&quot;}%notEmpty{, &quot;requestId&quot;:&quot;%X{requestId}&quot;}%notEmpty{, &quot;sessionId&quot;:&quot;%X{sessionId}&quot;}, &quot;logger&quot;:&quot;%logger&quot;, &quot;thread&quot;:&quot;%thread&quot;, &quot;instance&quot;:&quot;${sys:idp.log.instanceId}&quot;, &quot;message&quot;:&quot;%enc{%message}{JSON}&quot;%notEmpty{, &quot;throwable&quot;:&quot;%enc{%throwable}{JSON}&quot;}}%n</Property>
 
-        <!-- Pattern for syslog appender; uncomment when using syslog appender -->
-        <!--<Property name="idp.syslog.pattern">&lt;13&gt;1 %d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} ${hostName} rak-eeIdP - - - ${sys:idp.log.pattern}</Property>-->
+        <!-- Uncomment when using syslog appender; Pattern for syslog appender; Note that the syslog facility code is constant: 'local1' (17) and syslog priority is assigned error (3) in case of ERROR level, otherwise 'notice' (5) shall be used) -->
+        <!-- Property name="idp.syslog.pattern">&lt;%level{WARN=141, DEBUG=141, ERROR=139, TRACE=141, INFO=141}&gt;1 %d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} ${hostName} rak-eeIdp.log - - - ${sys:idp.log.pattern}</Property-->
     </Properties>
 
     <Appenders>
