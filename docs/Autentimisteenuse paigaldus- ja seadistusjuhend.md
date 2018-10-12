@@ -86,4 +86,58 @@ Logimiseks kasutatakse SLF4J teeki. Logi konfiguratsioon tuleb ette anda väljas
 
 ### 5.1 Seotud sõltuvused
 
-Eesti id provider on ehitatud nii, et logimine on täielikult välise konteineri poolt seadistatav. See tähendab, et väline konteiner peab kättesaadavaks tegema SLF4J api teegi (_slf4j-api-1.7.*.jar_), konteineri haldaja poolt valitud konkreetse logimislahenduse teegid (logbacki puhul näiteks _logback-core-1.2.3.jar_ ja _logback-classic-1.2.3.jar_), kui ka logimise konfiguratsiooni (logbacki puhul kättesaadav konfiguratsioonifail _logback.xml_). Näidisena kasutatav _logback.xml_ on projekti repositooriumis.
+Eesti id provider on ehitatud nii, et logimine on täielikult välise konteineri poolt seadistatav. See tähendab, et väline konteiner peab kättesaadavaks tegema SLF4J api teegi (_slf4j-api-1.7.*.jar_), konteineri haldaja poolt valitud konkreetse logimislahenduse teegid (log4j2 puhul näiteks _log4j-api-2.11.1.jar_, _log4j-core-2.11.1.jar_ ja _log4j-slf4j-impl-2.11.1.jar_), kui ka logimise konfiguratsiooni (log4j2 puhul kättesaadav konfiguratsioonifail _log4j2.xml_). Näidisena kasutatav _log4j2.xml_ on projekti repositooriumis.
+
+### 5.2 Näidiskonfiguratsioon
+
+Projekti repositooriumis on näidiskonfiguratsioonifail [log4j2.xml](../log4j2.xml), mis seadistab log4j2 logima vaikimisi _/opt/tomcat/logs/IdP.log_ faili paketis _ee.ria.IdP_ aset leidvad sündmused `INFO` tasemel ning kõik muu `WARN` tasemel.
+Logifailide _roll-over_ toimub iga päev, faili mahupiirangu (100 MB) ületatamisel või siis, kui rakendus taaskäivitatakse. Eelnevad failid pakitakse `gz` formaati ning tõstetakse kausta, mille nimi vastab `yyyy-MM` kuupäevaformaadile.
+
+Logikirjed vormindatakse JSON kujul eraldatuna reavahesümboliga `\n` ning nad sisaldavad järgmisi välju:
+
+| Väli         | Kirjeldus | Alati olemas |
+| :----------- | :-------- | :----------- |
+| **date** | Sündmuse kuupäev ja kellaaeg ISO-8601 formaadis. Näide: `2018-09-24T11:38:16,278+0000` | Jah |
+| **level** | Logisündmuse tase. Võimalikud väärtused (vähim tõsisest kõige tõsisemani): `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL` | Jah |
+| **request** | Päringu meetod ja URL varjestatuna JSON-_escaping_'uga. Puudub, kui logisündmus ei ole väljastatud päringu käigus. Näide: `POST http://eidas-idp.dev:8082/IdP/auth` | Ei |
+| **requestId** | Päringut identifitseeriv juhugenereeritud 16 sümboliline tähtede-numbrite kombinatsioon. Puudub, kui logisündmus ei ole väljastatud päringu käigus. | Ei |
+| **sessionId** | Päringu sessiooni ID-st genereeritud **sha256** räsi base64 kujul. Puudub, kui logisündmus ei ole väljastatud päringu käigus. | Ei |
+| **logger** | Logija nimi. | Jah |
+| **thread** | Lõime nimi. | Jah |
+| **instance** | Logiva rakenduse instatsi ID. | Jah |
+| **message** | Logisõnum varjestatuna JSON-_escaping_'uga. | Jah |
+| **throwable** | Vea _stack trace_ varjestatuna JSON-_escaping_'uga. | Ei |
+
+Näide:
+
+```
+{"date":"2018-09-24T11:38:16,278+0000", "level":"INFO", "request":"POST http://eidas-idp.dev:8082/IdP/auth", "requestId":"3RXX7MBW4XAUNS9B", "sessionId":"blhd-BvpmW3usNv7BQGd4WwdHRQVN4Afp2hgZ10uc4Q=", "logger":"ee.ria.IdP.eidas.EidasIdPImpl", "thread":"http-nio-8082-exec-2", "instance":"IdP-instance-1", "message":"SAML request ID: _2KLlLNJPWRNP2FjAhWsHpMEVFSoLQhEVEsh6efd0UnTFcnhk3ie_-WgHr.wMpQH"}
+```
+
+Näidiskonfiguratsiooni on võimalik seadistada järgnevate parameetrite abil:
+
+| Parameeter        | Kirjeldus | Vaikeväärtus |
+| :---------------- | :---------- | :----------------|
+| `idp.log.instanceId` | Rakenduse instantsi ID. **NB:** rakenduse paigaldamisel mitme instantsina on soovitatav see parameeter iga instantsi puhul määrata, et erinevatest instantsidest pärit logikirjed oleksid eristatavad. | `eeIdP` |
+| `idp.log.dir` | IdP logide baaskaust. | `/opt/tomcat/logs` |
+| `idp.log.pattern` | Logisündmuse muster (vt. [Log4j2 Pattern Layout](https://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout)). | `{"date":"%d{yyyy-MM-dd'T'HH:mm:ss,SSSZ}", "level":"%level"%notEmpty{, "request":"%enc{%X{request}}{JSON}"}%notEmpty{, "requestId":"%X{requestId}"}%notEmpty{, "sessionId":"%X{sessionId}"}, "logger":"%logger", "thread":"%thread", "instance":"${sys:idp.log.instanceId}", "message":"%enc{%message}{JSON}"%notEmpty{, "throwable":"%enc{%throwable}{JSON}"}}%n` |
+
+Nende parameetrite vaikeväärtusi on võimalik muuta rakenduse käivitamisel etteantavate süsteemiparameetrite abil, näiteks:
+
+```
+export JAVA_OPTS="-Didp.log.instanceId=IdP-instance-1 -Didp.log.dir=/var/logs/idp -Didp.log.pattern=%m%n"
+```
+
+Logimisel saadaolevad **MDC** (_Mapped Diagnostic Context_) atribuudid:
+
+| Atribuut          | Kirjeldus |
+| :---------------- | :-------- |
+| `request` | Päringu meetod ja URL. Väärtustamata, kui logisündmus ei ole väljastatud päringu käigus. Näide: `POST http://eidas-idp.dev:8082/IdP/auth` |
+| `requestId` | Päringut identifitseeriv juhugenereeritud 16 sümboliline tähtede-numbrite kombinatsioon. Väärtustamata, kui logisündmus ei ole väljastatud päringu käigus. |
+| `sessionId` | Päringu sessiooni ID-st genereeritud **sha256** räsi base64 kujul. Väärtustamata, kui logisündmus ei ole väljastatud päringu käigus. |
+
+Et näidiskonfiguratsioon (või ka ise kirjutatud seadistus) rakenduks, tuleb konfiguratsioonifaili asukoht rakendusele süsteemiparameetrite abil ette anda, näiteks:
+
+```
+export JAVA_OPTS="-Dlog4j2.configurationFile=file:/opt/tomcat/conf/log4j2.xml"
+```

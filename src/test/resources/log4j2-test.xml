@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="30">
+
+    <Appenders>
+        <Console name="idpConsole">
+            <PatternLayout charset="UTF-8" pattern="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="eu.eidas" level="DEBUG" additivity="false">
+            <AppenderRef ref="idpConsole"/>
+        </Logger>
+
+        <Logger name="eu.eidas" level="DEBUG" additivity="false">
+            <AppenderRef ref="idpConsole"/>
+        </Logger>
+
+        <Root level="INFO">
+            <AppenderRef ref="idpConsole"/>
+        </Root>
+    </Loggers>
+
+</Configuration>
