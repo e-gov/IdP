@@ -1,0 +1,12 @@
+<head>
+    <title><spring:message code="html.head.title"/></title>
+
+    <link href="static/favicon.ico" rel="shortcut icon" type="image/x-icon">
+    <link href="static/main.css" rel="stylesheet">
+
+    <meta name="author" content="<spring:message code="html.head.author"/>">
+    <meta name="copyright" content="<spring:message code="html.head.copyright"/>">
+    <meta name="description" content="<spring:message code="html.head.description"/>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+</head>

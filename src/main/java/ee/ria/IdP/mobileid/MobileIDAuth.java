@@ -23,10 +23,9 @@
  *
  */
 
-package ee.ria.IdP;
+package ee.ria.IdP.mobileid;
 
 import com.codeborne.security.AuthenticationException;
-import com.codeborne.security.mobileid.MobileIDAuthenticator;
 import com.codeborne.security.mobileid.MobileIDSession;
 import ee.ria.IdP.exceptions.MobileIdError;
 import ee.ria.IdP.model.IdPTokenCacheItem;
@@ -44,7 +43,7 @@ import org.springframework.stereotype.Service;
 public class MobileIDAuth implements MobileIDAuthI {
     private static final Logger LOG = LoggerFactory.getLogger(MobileIDAuth.class);
 
-    private MobileIDAuthenticator authenticator;
+    private MobileIDAuthenticatorWrapper authenticator;
 
     /**
      *
@@ -56,7 +55,7 @@ public class MobileIDAuth implements MobileIDAuthI {
                         @Value("${DigiDocServiceName: Testimine}") String serviceName) {
         // make sure that keystores are set correctly at tomcat level!
 
-        authenticator = new MobileIDAuthenticator(serviceUrl);
+        authenticator = new MobileIDAuthenticatorWrapper(serviceUrl);
         authenticator.setServiceName(serviceName);
     }
 
@@ -68,9 +67,9 @@ public class MobileIDAuth implements MobileIDAuthI {
      * @throws MobileIdError
      */
     @Override
-    public MobileIDSession startMobileIdAuth(String phoneNumber) throws MobileIdError {
+    public MobileIDSession startMobileIdAuth(String personalCode, String phoneNumber) throws MobileIdError {
         try {
-            MobileIDSession mobileIDSession = authenticator.startLogin(phoneNumber);
+            MobileIDSession mobileIDSession = authenticator.startLogin(personalCode, phoneNumber);
             return mobileIDSession;
         }
         catch (AuthenticationException e) {

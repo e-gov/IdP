@@ -1,0 +1,21 @@
+<div class="c-header-bar">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <p><spring:message code="html.header.slogan"/></p>
+            <form action="auth" method="post" class="c-form">
+                <input type="hidden" name="SAMLRequest" value="${SAMLRequest}"/>
+                <ul class="c-lang-list">
+                    <% if (!"et".equals(request.getParameter("lang"))) { %><li class="c-lang-list__item">
+                        <button type="submit" name="lang" value="et" class="c-lang-list__button"><spring:message code="html.header.et"/></button>
+                    </li><% } %>
+                    <% if (!"en".equals(request.getParameter("lang"))) { %><li class="c-lang-list__item">
+                        <button type="submit" name="lang" value="en" class="c-lang-list__button"><spring:message code="html.header.en"/></button>
+                    </li><% } %>
+                    <% if (!"ru".equals(request.getParameter("lang"))) { %><li class="c-lang-list__item">
+                        <button type="submit" name="lang" value="ru" class="c-lang-list__button"><spring:message code="html.header.ru"/></button>
+                    </li><% } %>
+                </ul>
+            </form>
+        </div>
+    </div>
+</div>
