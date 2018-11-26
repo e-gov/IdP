@@ -1,0 +1,13 @@
+<div class="c-footer">
+    <div class="container">
+        <div class="c-footer__row">
+            <div class="c-footer__col">
+                <div class="c-footer__block">
+                    <div class="c-footer__block-logo">
+                        <img src="<spring:message code="logo.footer.cef"/>" alt="CEF">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

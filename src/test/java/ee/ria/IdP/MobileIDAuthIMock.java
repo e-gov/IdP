@@ -27,13 +27,16 @@ package ee.ria.IdP;
 
 import com.codeborne.security.mobileid.MobileIDSession;
 import ee.ria.IdP.exceptions.MobileIdError;
+import ee.ria.IdP.mobileid.MobileIDAuthI;
 import ee.ria.IdP.model.IdPTokenCacheItem;
 
-public class MobileIDAuthIMock implements MobileIDAuthI{
+public class MobileIDAuthIMock implements MobileIDAuthI {
     @Override
-    public MobileIDSession startMobileIdAuth(String phoneNumber) throws MobileIdError {
+    public MobileIDSession startMobileIdAuth(String personalCode, String phoneNumber) throws MobileIdError {
+        if("throw".equals(personalCode))
+            throw new MobileIdError("throwed for personal code as requested", null);
         if("throw".equals(phoneNumber))
-            throw new MobileIdError("throwed as requested", null);
+            throw new MobileIdError("throwed for phone number as requested", null);
         MobileIDSession mockSession = new MobileIDSession(1, "mock_challenge",
                 "mock_firstname", "mock_lastname", "36002121234");
         return mockSession;

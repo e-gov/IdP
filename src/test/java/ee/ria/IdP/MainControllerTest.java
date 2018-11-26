@@ -27,8 +27,7 @@ public class MainControllerTest {
         eidasIdPIMock = new EidasIdPIMock();
         mobileIDAuthIMock = new MobileIDAuthIMock();
 
-        idPMainController = new IdPMainController( metaDataIMock, eidasIdPIMock, mobileIDAuthIMock, 100,
-                "https://ria.ee/idp");
+        idPMainController = new IdPMainController( metaDataIMock, eidasIdPIMock, mobileIDAuthIMock, 100);
     }
 
     @Test
@@ -94,7 +93,7 @@ public class MainControllerTest {
     public void midauthSuccess() throws InvalidAuthRequest {
         Model mockModel = new ExtendedModelMap();
         String view = idPMainController.startMobileIdAuth( "not_used_by_mock", null,
-                "+372123", mockModel );
+                "","+372123", mockModel );
         assertEquals("midwait", view);
         assertTrue(mockModel.containsAttribute("sessionToken"));
         assertEquals("1", mockModel.asMap().get("sessionToken"));
@@ -106,20 +105,29 @@ public class MainControllerTest {
     }
 
     @Test
-    public void midauthError() throws InvalidAuthRequest {
+    public void midauthError1() throws InvalidAuthRequest {
         Model mockModel = new ExtendedModelMap();
         String view = idPMainController.startMobileIdAuth( "not_used_by_mock", null,
-                "throw", mockModel );
+                "throw","not_used", mockModel );
         assertEquals("error", view);
         assertTrue(mockModel.containsAttribute("SAMLResponse"));
         assertEquals("mock_error_response", mockModel.asMap().get("SAMLResponse"));
+    }
 
+    @Test
+    public void midauthError2() throws InvalidAuthRequest {
+        Model mockModel = new ExtendedModelMap();
+        String view = idPMainController.startMobileIdAuth( "not_used_by_mock", null,
+                "not_used","throw", mockModel );
+        assertEquals("error", view);
+        assertTrue(mockModel.containsAttribute("SAMLResponse"));
+        assertEquals("mock_error_response", mockModel.asMap().get("SAMLResponse"));
     }
 
     @Test
     public void midCheckFinished() throws MobileIdError {
         Model mockModel = new ExtendedModelMap();
-        MobileIDSession mobileIDSession = mobileIDAuthIMock.startMobileIdAuth("not_used");
+        MobileIDSession mobileIDSession = mobileIDAuthIMock.startMobileIdAuth("not_used", "not_used");
         IdPTokenCacheItem cacheItem = new IdPTokenCacheItem( "finished",
                 eidasIdPIMock.parseRequest("mock_request"), mobileIDSession);
         idPMainController.putCacheItem(cacheItem, "mock_token");
@@ -132,7 +140,7 @@ public class MainControllerTest {
     @Test
     public void midCheckAlreadyFinished() throws MobileIdError {
         Model mockModel = new ExtendedModelMap();
-        MobileIDSession mobileIDSession = mobileIDAuthIMock.startMobileIdAuth("not_used");
+        MobileIDSession mobileIDSession = mobileIDAuthIMock.startMobileIdAuth("not_used", "not_used");
         IdPTokenCacheItem cacheItem = new IdPTokenCacheItem( "finished",
                 eidasIdPIMock.parseRequest("mock_request"), mobileIDSession);
         cacheItem.setCompleted(null);
@@ -158,7 +166,7 @@ public class MainControllerTest {
 
     @Test
     public void midstatusWait() throws MobileIdError {
-        MobileIDSession mobileIDSession = mobileIDAuthIMock.startMobileIdAuth("not_used");
+        MobileIDSession mobileIDSession = mobileIDAuthIMock.startMobileIdAuth("not_used", "not_used");
         IdPTokenCacheItem cacheItem = new IdPTokenCacheItem( "not_finished",
                 eidasIdPIMock.parseRequest("mock_request"), mobileIDSession);
         idPMainController.putCacheItem(cacheItem, "mock_token");
@@ -169,7 +177,7 @@ public class MainControllerTest {
 
     @Test
     public void midstatusOk() throws MobileIdError {
-        MobileIDSession mobileIDSession = mobileIDAuthIMock.startMobileIdAuth("not_used");
+        MobileIDSession mobileIDSession = mobileIDAuthIMock.startMobileIdAuth("not_used", "not_used");
         IdPTokenCacheItem cacheItem = new IdPTokenCacheItem( "not_finished",
                 eidasIdPIMock.parseRequest("mock_request"), mobileIDSession);
         cacheItem.setCompleted(null);
