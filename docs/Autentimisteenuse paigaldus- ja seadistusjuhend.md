@@ -3,9 +3,9 @@
 
 Autentimisteenus on mõeldud töötama Tomcat veebirakendusena. SSL ühendused lõpetatakse väljaspool Tomcati - eeldatavalt Apache veebiserveri poolt. SSL ühenduste lõpetamisel peab veebiserver kontrollima ka kliendi sertifikaatide kehtivust OCSP teenuse kaudu. Autentimisteenus ise sertifikaadi tühistust ei kontrolli.
 
-Tomcati paigaldamine käib vastavalt juhenditele aadressil https://tomcat.apache.org/tomcat-7.0-doc/setup.html.
+Tomcati paigaldamine käib vastavalt juhenditele aadressil https://tomcat.apache.org/tomcat-8.5-doc/setup.html.
 
-Eesti id provider eeldab, et tomcatile on paigaldatud eidas-node sõltuvused vastavalt eidas-node paigaldusjuhendile (https://ec.europa.eu/cefdigital/wiki/download/attachments/46992189/eIDAS-Node%20Installation%20and%20Configuration%20Guide.pdf?version=1&modificationDate=1507296786249&api=v2). Tomcat 7 puudutav osa on kirjeldatud leheküljel 17.
+Eesti id provider eeldab, et tomcatile on paigaldatud eidas-node sõltuvused vastavalt eidas-node paigaldusjuhendile (https://ec.europa.eu/cefdigital/wiki/download/attachments/68330478/eIDAS-Node%20Installation%20Manual%20v1.4.3.pdf?version=1&modificationDate=1536823008963&api=v2). Tomcat 8 puudutav osa on kirjeldatud leheküljel 19.
 
 ## 2. Sertifikaadi info edastamine autentimisteenusele
 

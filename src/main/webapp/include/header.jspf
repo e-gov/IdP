@@ -1,0 +1,10 @@
+<header class="c-header">
+    <div class="container">
+        <h1 class="c-header__logo">
+            <span class="c-header__logo-link">
+                <img src="<spring:message code="logo.header.eeidp"/>" alt="<spring:message code="html.header.title"/>">
+                <span class="sr-only"><spring:message code="html.header.title"/></span>
+            </span>
+        </h1>
+    </div>
+</header>

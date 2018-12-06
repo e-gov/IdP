@@ -1,0 +1,1 @@
+window.setTimeout(function t(){var e=document.body.getAttribute("data-check-url"),o=new XMLHttpRequest;o.onreadystatechange=function(){4===this.readyState&&(200===this.status&&"WAIT"===this.responseText?window.setTimeout(t,5e3):document.forms.mobileIdCheckForm.submit())},o.open("GET",e+"&ts="+Date.now(),!0),o.send()},5e3);

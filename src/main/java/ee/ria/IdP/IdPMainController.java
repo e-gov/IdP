@@ -34,10 +34,10 @@ import ee.ria.IdP.exceptions.InvalidAuthData;
 import ee.ria.IdP.exceptions.InvalidAuthRequest;
 import ee.ria.IdP.exceptions.MobileIdError;
 import ee.ria.IdP.metadata.MetaDataI;
+import ee.ria.IdP.mobileid.MobileIDAuthI;
 import ee.ria.IdP.model.EENaturalPerson;
 import ee.ria.IdP.model.IdPTokenCacheItem;
 import eu.eidas.auth.commons.protocol.IAuthenticationRequest;
-import eu.eidas.auth.commons.protocol.IResponseMessage;
 import eu.eidas.engine.exceptions.EIDASSAMLEngineException;
 import org.bouncycastle.util.encoders.Base64;
 import org.joda.time.format.DateTimeFormat;
@@ -75,8 +75,7 @@ public class IdPMainController {
 
     public IdPMainController(MetaDataI metaDataI, EidasIdPI eidasIdPI,
                              MobileIDAuthI mobileIDAuthI,
-                             @Value("${TokenExpiration: 200}") long tokenExpiration,
-                             @Value("${BaseUrl}") String baseUrl ) {
+                             @Value("${TokenExpiration: 200}") long tokenExpiration) {
         this.metaDataI = metaDataI;
         this.eidasIdPI = eidasIdPI;
         this.mobileIDAuth = mobileIDAuthI;
@@ -84,8 +83,6 @@ public class IdPMainController {
         tokenCache = CacheBuilder.newBuilder()
                 .expireAfterWrite( tokenExpiration, TimeUnit.SECONDS)
                 .build();
-
-        this.baseUrl = baseUrl;
 
         dateFormatter = DateTimeFormat.forPattern("dd.MM.yyyy");
     }
@@ -247,17 +244,21 @@ public class IdPMainController {
     @PostMapping(value="/midauth")
     public String startMobileIdAuth(@RequestParam(required = false) String SAMLRequest,
                                     @RequestParam(required = false) String lang,
+                                    @RequestParam(required = false) String personalCode,
                                     @RequestParam(required = false) String phoneNumber,
                                     Model model) throws InvalidAuthRequest {
         IAuthenticationRequest authenticationRequest = eidasIdPI.parseRequest(SAMLRequest);
 
-        if(phoneNumber == null) {
-            return fillErrorInfo(model, SAMLRequest, authenticationRequest, null, "error.phone.number",lang);
+        if (personalCode == null) {
+            return fillErrorInfo(model, SAMLRequest, authenticationRequest, null, "error.personal.code", lang);
+        }
+        if (phoneNumber == null) {
+            return fillErrorInfo(model, SAMLRequest, authenticationRequest, null, "error.phone.number", lang);
         }
 
         MobileIDSession mobileIDSession;
         try {
-            mobileIDSession = mobileIDAuth.startMobileIdAuth(phoneNumber);
+            mobileIDSession = mobileIDAuth.startMobileIdAuth(personalCode, phoneNumber);
         } catch (MobileIdError mobileIdError) {
             return fillErrorInfo(model, SAMLRequest, authenticationRequest,mobileIdError,"error.mobileid", lang);
         }
@@ -267,9 +268,10 @@ public class IdPMainController {
         putCacheItem(cacheItem,sessionToken);
 
         model.addAttribute("lang", lang);
+        model.addAttribute("SAMLRequest", SAMLRequest);
         model.addAttribute( "sessionToken", sessionToken);
         model.addAttribute( "challenge", mobileIDSession.challenge);
-        model.addAttribute( "checkUrl", baseUrl + "/midstatus?sessionToken=" + cacheItem.getMobileIDSession().sessCode);
+        model.addAttribute( "checkUrl", "midstatus?sessionToken=" + cacheItem.getMobileIDSession().sessCode);
         return "midwait";
     }
 
@@ -292,7 +294,9 @@ public class IdPMainController {
                 if (!mobileIDAuth.checkMobileIdAuth(cacheItem)) {
                     model.addAttribute("sessionToken", sessionToken);
                     model.addAttribute("challenge", cacheItem.getMobileIDSession().challenge);
-                    model.addAttribute("checkUrl", baseUrl + "/midstatus?sessionToken=" + sessionToken);
+                    model.addAttribute("checkUrl", "midstatus?sessionToken=" + sessionToken);
+                    model.addAttribute("SAMLRequest", cacheItem.getOriginalRequest());
+                    model.addAttribute("lang", lang);
                     return "midwait";
                 }
             } catch (MobileIdError mobileIdError) {

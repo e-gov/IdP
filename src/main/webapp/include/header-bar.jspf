@@ -1,0 +1,7 @@
+<div class="c-header-bar">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <p><spring:message code="html.header.slogan"/></p>
+        </div>
+    </div>
+</div>

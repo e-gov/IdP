@@ -23,13 +23,13 @@
  *
  */
 
-package ee.ria.IdP;
+package ee.ria.IdP.mobileid;
 
 import com.codeborne.security.mobileid.MobileIDSession;
 import ee.ria.IdP.exceptions.MobileIdError;
 import ee.ria.IdP.model.IdPTokenCacheItem;
 
 public interface MobileIDAuthI {
-    MobileIDSession startMobileIdAuth(String phoneNumber) throws MobileIdError;
+    MobileIDSession startMobileIdAuth(String personalCode, String phoneNumber) throws MobileIdError;
     boolean checkMobileIdAuth(IdPTokenCacheItem cacheItem) throws MobileIdError;
 }
