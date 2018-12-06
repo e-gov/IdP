@@ -17,7 +17,7 @@
             <div class="c-header-bar">
                 <div class="container">
                     <div class="d-flex justify-content-between align-items-center">
-                        <p>Secure authentication for e-services</p>
+                        <p>Secure authentication in e-Services of EU member states</p>
                     </div>
                 </div>
             </div>
