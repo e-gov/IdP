@@ -153,7 +153,7 @@ public class EBusinessRegistryServiceTest {
     public void executeEsindusV2ServiceShouldFailWhenTimeout() {
 
         exception.expect(XroadServiceNotAvailable.class);
-        exception.expectMessage("Connection failed: Read timed out");
+        exception.expectMessage("Connection failed");
 
         wireMockRule.stubFor(post(urlEqualTo("/cgi-bin/consumer_proxy"))
                 .willReturn(aResponse()
@@ -180,7 +180,7 @@ public class EBusinessRegistryServiceTest {
 
         List<EELegalPerson> companies = eBusinessRegistryService.executeEsindusV2Service("47101010033");
         MatcherAssert.assertThat(companies, is(Arrays.asList(
-                new EELegalPerson("12341234", "Acme INC OÜ")
+                new EELegalPerson("Acme INC OÜ","12341234")
         )));
     }
 
@@ -196,13 +196,13 @@ public class EBusinessRegistryServiceTest {
 
         List<EELegalPerson> companies = eBusinessRegistryService.executeEsindusV2Service("47101010033");
         MatcherAssert.assertThat(companies, is(Arrays.asList(
-                new EELegalPerson("12341234-1", "Acme INC OÜ 1"),
-                new EELegalPerson("12341234-2", "Acme INC UÜ 2"),
-                new EELegalPerson("12341234-3", "Acme INC TÜ 3"),
-                new EELegalPerson("12341234-4", "Acme INC AS 4"),
-                new EELegalPerson("12341234-5", "Acme INC TÜH 5"),
-                new EELegalPerson("12341234-6", "Acme INC SA 6"),
-                new EELegalPerson("12341234-7", "Acme INC MTÜ 7")
+                new EELegalPerson("Acme INC OÜ 1","12341234-1"),
+                new EELegalPerson( "Acme INC UÜ 2", "12341234-2"),
+                new EELegalPerson( "Acme INC TÜ 3", "12341234-3"),
+                new EELegalPerson("Acme INC AS 4", "12341234-4"),
+                new EELegalPerson( "Acme INC TÜH 5", "12341234-5"),
+                new EELegalPerson( "Acme INC SA 6", "12341234-6"),
+                new EELegalPerson( "Acme INC MTÜ 7", "12341234-7")
         )));
     }
 

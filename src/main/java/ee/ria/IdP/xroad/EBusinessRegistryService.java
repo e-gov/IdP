@@ -15,6 +15,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.net.ssl.SSLException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -150,7 +151,7 @@ public class EBusinessRegistryService {
                 }
             }
 
-        } catch (SocketTimeoutException | ConnectException | UnknownHostException e) {
+        } catch (SocketTimeoutException | ConnectException | UnknownHostException | SSLException e) {
             throw new XroadServiceNotAvailable("Connection failed: " + e.getMessage(), e);
         } catch (XPathExpressionException | IOException | SAXException | ParserConfigurationException e) {
             throw new IllegalStateException("Failed to extract data from response: " + e.getMessage(), e);
