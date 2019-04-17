@@ -37,14 +37,20 @@ public class IdPTokenCacheItem {
     private String originalRequest;
     private IAuthenticationRequest samlRequest;
     private MobileIDSession mobileIDSession;
+    private boolean isLegalPersonRequest = false;
 
     private boolean completed = false;
     private MobileIdError error = null;
 
     public IdPTokenCacheItem(String originalRequest, IAuthenticationRequest samlRequest, MobileIDSession mobileIDSession) {
+        this(originalRequest, samlRequest, mobileIDSession, false);
+    }
+
+    public IdPTokenCacheItem(String originalRequest, IAuthenticationRequest samlRequest, MobileIDSession mobileIDSession, boolean isLegalPersonRequest) {
         this.originalRequest = originalRequest;
         this.samlRequest = samlRequest;
         this.mobileIDSession = mobileIDSession;
+        this.isLegalPersonRequest = isLegalPersonRequest;
     }
 
     public String getOriginalRequest() {
@@ -70,5 +76,9 @@ public class IdPTokenCacheItem {
 
     public synchronized MobileIdError getError() {
         return error;
+    }
+
+    public boolean isLegalPersonRequest() {
+        return isLegalPersonRequest;
     }
 }

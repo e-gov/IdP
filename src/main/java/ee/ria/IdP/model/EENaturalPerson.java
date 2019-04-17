@@ -26,13 +26,14 @@
 package ee.ria.IdP.model;
 
 import ee.ria.IdP.exceptions.InvalidAuthData;
-import ee.ria.IdP.exceptions.InvalidAuthRequest;
 import org.joda.time.DateTime;
+
+import java.io.Serializable;
 
 /**
  * Model object for natural persons
  */
-public class EENaturalPerson {
+public class EENaturalPerson implements Serializable {
     private String familyName;
     private String firstName;
     private String idCode;

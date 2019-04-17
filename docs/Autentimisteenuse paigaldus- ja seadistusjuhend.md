@@ -39,13 +39,13 @@ Autentimisteenus ootab päises _SSL_CLIENT_CERT_ kliendi sertifikaati PEM kodeer
 Autentimisteenust konfigureeritakse kontekstiparameetrite kaudu. Tomcatile sobiv näidiskonfiguratsioon on failis IdP.xml. Konfiguratsiooniparameetrid on järgmised:
 
 | Parameeter | Kirjeldus |
-|:-|:-|
+|:----|:----|
 |BaseUrl|URL nii nagu autentimisteenus on nähtav lõppkasutajatele, näiteks "https://eeidp.ria.ee"|
 |KeystoreFile|Autentimisteenuse võtmehoidla asukoht, võtmehoidla peab olema jks formaadis.|
 |KeystorePassword|Võtmehoidla ja hoidlas olevate võtmete parool.|
 |TokenExpiration|Mobiil-ID sessiooni aegumise kestus sekundites.|
 |DigiDocServiceUrl|Mobiil-ID teenuse URL. Testkeskkonna url on "https://tsp.demo.sk.ee".|
-|DigiDocServiceName|Mobiil-ID teenuse nimi, tesimisel saab kasutatada väärtust "Testimine".|
+|DigiDocServiceName|Mobiil-ID teenuse nimi, testimisel saab kasutatada väärtust "Testimine".|
 
 Järgnevate parameetrite väärtuseid kasutatakse autentimisteenuse metaandmetes. Kõik väärtused on nõutavad.
 
@@ -64,6 +64,25 @@ Järgnevate parameetrite väärtuseid kasutatakse autentimisteenuse metaandmetes
 	OrganizationName
 	OrganizationDisplayName
 	OrganizationUrl
+	
+
+Järgnevate parameetrite väärtuseid kasutatakse juriidiliste isikute pärimiseks üle X-tee. Kõik parameetrid on kohustuslikud, kui ei ole kirjelduses väidetud vastupidist.
+
+| Parameeter | Kirjeldus |
+|:----|:----|
+|XroadServerUrl| X-tee turvaserveri URL. |
+|XroadServerConnectTimeoutInMilliseconds| X-tee turvaserveriga ühendumise aegumise piirmäär. Mittekohustuslik parameeter, vaikimisi 3000 |
+|XroadServerReadTimeoutInMilliseconds| X-tee turvaserverist vastuse lugemise aegumise piirmäär. Mittekohustuslik parameeter, vaikimisi 3000 |
+|XRoadClientSubSystemRoadInstance| Liituja X-tee keskkonna kood. |
+|XRoadClientSubSystemMemberClass| Liituja X-tee liikmeklass. |
+|XRoadClientSubSystemMemberCode| Liituja asutuse X-tee registrikood.  |
+|XRoadClientSubSystemSubsystemCode| Liituja asutuse alamsüsteemi nimi. |
+|XRoadServiceRoadInstance| Kasutatava X-tee teenuse pakkuja keskkonna kood. |
+|XRoadServiceMemberClass| Kasutatava X-tee teenuse pakkuja liikmeklass |
+|XRoadServiceMemberCode| Kasutatava X-tee teenuse pakkuja liikme registrikood. |
+|XRoadServiceSubsystemCode| Kasutatava X-tee teenuse alamsüsteemi nimi. |
+|XRoadEsindusv2AllowedTypes| Lubatud juriidiliste isikute tüübid komaga eraldatult (näiteks: OÜ,AS). <br><br>Koodid peavad vastama äriregistri esindus_v2 vastuses leitud juriidiliste isikute tüübi piirangutele (oiguslik_vorm elemendi sisu alusel). <br><br>Mittekohustuslik parameeter. Vaikimisi kasutatakse järgmist nimekirja: TÜ, UÜ, OÜ, AS, TÜH, SA, MTÜ |
+
 
 ## 4. Autentimisteenuse kasutatavad krüptovõtmed ja sertifikaadid
 

@@ -27,9 +27,11 @@ package ee.ria.IdP;
 
 import ee.ria.IdP.eidas.EidasIdPI;
 import ee.ria.IdP.exceptions.InvalidAuthRequest;
+import ee.ria.IdP.model.EELegalPerson;
 import ee.ria.IdP.model.EENaturalPerson;
 import eu.eidas.auth.commons.EidasErrorKey;
 import eu.eidas.auth.commons.EidasErrors;
+import eu.eidas.auth.commons.attribute.ImmutableAttributeMap;
 import eu.eidas.auth.commons.protocol.IAuthenticationRequest;
 import eu.eidas.auth.commons.protocol.eidas.LevelOfAssuranceComparison;
 import eu.eidas.auth.commons.protocol.eidas.impl.EidasAuthenticationRequest;
@@ -39,6 +41,26 @@ import eu.eidas.engine.exceptions.EIDASSAMLEngineException;
 public class EidasIdPIMock implements EidasIdPI {
     @Override
     public IAuthenticationRequest parseRequest(String samlRequest) {
+        return getMockRequest(null);
+    }
+
+    @Override
+    public String buildAuthenticationResponse(IAuthenticationRequest authRequest, EENaturalPerson naturalPerson) {
+        return "mock_response";
+    }
+
+    @Override
+    public String buildAuthenticationResponse(IAuthenticationRequest authRequest, EENaturalPerson naturalPerson, EELegalPerson legalPerson) {
+        return "mock_legalperson_response";
+    }
+
+    @Override
+    public String buildErrorResponse(IAuthenticationRequest authRequest) {
+        return "mock_error_response";
+    }
+
+
+    public static EidasAuthenticationRequest getMockRequest(ImmutableAttributeMap attributes) {
         EidasAuthenticationRequest.Builder builder = EidasAuthenticationRequest.builder();
         builder.originCountryCode("ET");
         builder.assertionConsumerServiceURL( "https://someurl.com/");
@@ -50,7 +72,7 @@ public class EidasIdPIMock implements EidasIdPI {
         builder.levelOfAssurance( "http://eidas.europa.eu/LoA/high");
         builder.nameIdFormat(null);
         builder.providerName("mockprovider");
-        builder.requestedAttributes(null); //attributeMapBuilder.build());
+        builder.requestedAttributes(attributes); //attributeMapBuilder.build());
 
         builder.levelOfAssuranceComparison(LevelOfAssuranceComparison.MINIMUM.stringValue());
         builder.spType(null);
@@ -58,15 +80,5 @@ public class EidasIdPIMock implements EidasIdPI {
         EidasAuthenticationRequest request;
         request = builder.build();
         return request;
-    }
-
-        @Override
-    public String buildAuthenticationResponse(IAuthenticationRequest authRequest, EENaturalPerson naturalPerson) {
-        return "mock_response";
-    }
-
-    @Override
-    public String buildErrorResponse(IAuthenticationRequest authRequest) {
-        return "mock_error_response";
     }
 }
