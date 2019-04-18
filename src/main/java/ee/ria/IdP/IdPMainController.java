@@ -285,6 +285,7 @@ public class IdPMainController {
         try {
             mobileIDSession = mobileIDAuth.startMobileIdAuth(personalCode, phoneNumber);
         } catch (MobileIdError mobileIdError) {
+            LOG.error("DigidocService returned an error: " + mobileIdError.getMessage(), mobileIdError);
             return fillErrorInfo(model, SAMLRequest, authenticationRequest,mobileIdError,"error.mobileid", lang);
         }
 
@@ -330,6 +331,7 @@ public class IdPMainController {
                     return "midwait";
                 }
             } catch (MobileIdError mobileIdError) {
+                LOG.error("DigidocService returned an error: " + mobileIdError.getMessage(), mobileIdError);
                 return fillErrorInfo(model, cacheItem.getOriginalRequest(), cacheItem.getSamlRequest(),mobileIdError,"error.mobileid", lang);
             }
         } else if(cacheItem.getError()!=null) {
