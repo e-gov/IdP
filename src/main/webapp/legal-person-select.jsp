@@ -38,6 +38,7 @@
                     <c:if test="${sessionScope.naturalPerson.idCode != null}">
                         <div id="results-container" class="alert alert-neutral">
                             <span id="results-loading" class="hidden">
+                                <div class="loadersmall"></div>
                                 <div><spring:message code="html.auth.legalperson-loading"/></div>
                             </span>
                             <span id="results-summary" class="hidden">

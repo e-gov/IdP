@@ -27,6 +27,7 @@ package ee.ria.IdP.model;
 
 import ee.ria.IdP.exceptions.InvalidAuthData;
 import org.joda.time.DateTime;
+import org.springframework.util.Assert;
 
 import java.io.Serializable;
 
@@ -45,6 +46,9 @@ public class EENaturalPerson implements Serializable {
         this.idCode = idCode;
 
         this.birthDate = calcBirthDate();
+        Assert.notNull(this.familyName, "familyName cannot be null");
+        Assert.notNull(this.firstName, "firstName cannot be null");
+        Assert.notNull(this.idCode, "idCode cannot be null");
     }
 
     public String getFamilyName() {

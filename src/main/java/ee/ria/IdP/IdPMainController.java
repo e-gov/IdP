@@ -249,9 +249,6 @@ public class IdPMainController {
         String surname = params.get("SURNAME");
         String givenname = params.get("GIVENNAME");
         String serialnumber = params.get("SERIALNUMBER");
-        Assert.notNull(givenname, "Givenname cannot be null");
-        Assert.notNull(surname, "Surname cannot be null");
-        Assert.notNull(serialnumber, "Cert serialnumber cannot be null");
         return new EENaturalPerson(surname,givenname,serialnumber);
     }
 
@@ -259,7 +256,7 @@ public class IdPMainController {
     public String showMobileIdStart(@RequestParam(required = false) String SAMLRequest,
                                     @RequestParam(required = false) String lang,
                                     Model model) throws InvalidAuthRequest {
-        IAuthenticationRequest request = eidasIdPI.parseRequest(SAMLRequest);
+        eidasIdPI.parseRequest(SAMLRequest);
 
         model.addAttribute("lang", lang);
         model.addAttribute("SAMLRequest", SAMLRequest);

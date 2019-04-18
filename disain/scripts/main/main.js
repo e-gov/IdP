@@ -114,41 +114,4 @@ jQuery(function ($) {
 	$('#mobileIdForm input.form-control').on('focus', function(){
 		validateFormFieldValue($(this), function(){return true;});
 	});
-
-	$(document).ready(function() {
-        $("#loading").hide();
-    });
-
-	$('#getLegalPersons').on('click', function() {
-                alert('#authorize-form has finished loading');
-                $('#btnSubmitSelectedLegalPerson').hide();
-                $.ajax({
-                    type: "GET",
-                    dataType: "json",
-                    url: "/IdP/legal_person",
-                    beforeSend: function(){
-                        $('#loading').show();
-                        $('#btnSubmitSelectedLegalPerson').hide();
-                        $('#submitToEidasNode').hide();
-
-                    },
-                    success: function(json) {
-                        $('#loading').hide();
-                        $('#legal-person-results').empty();
-                        $.each(json.legalPersons, function(idx, legalperson){
-                            var legalPersonItem = $('<li><input type="radio" name="legalperson" value="' + legalperson.legalPersonIdentifier + '" id="' + legalperson.legalPersonIdentifier + '" /> <label for="' + legalperson.legalPersonIdentifier + '">' + legalperson.legalName + ', ' + legalperson.legalPersonIdentifier + '</label></li>').on('click', function() {
-                                    alert($("input[name='legalperson']:checked").val());
-                                    $('input[name="legalPersonId"]').val($("input[name='legalperson']:checked").val());
-                                    $('#btnSubmitSelectedLegalPerson').show();
-                            });
-                            $('#legal-person-results').append(legalPersonItem);
-                        })
-                    }
-                });
-            });
-
-
-
-
-
 });

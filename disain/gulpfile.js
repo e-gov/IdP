@@ -15,6 +15,7 @@ config = {
     IMG: './assets/**/*',
     FONTS: './fonts/**/*',
     SASS: './styles/**/*.scss',
+    JS_GENERAL: './scripts/general/**/*.js',
     JS_MAIN: './scripts/main/**/*.js',
     JS_FORM: './scripts/form/**/*.js',
     JS_LEGALPERSON: './scripts/legalperson/**/*.js'
@@ -70,7 +71,7 @@ gulp.task('build:css', function() {
 // Build js
 gulp.task('build:js_main', function(cb) {
   pump([
-    gulp.src(config.SRC.JS_MAIN),
+    gulp.src([config.SRC.JS_GENERAL, config.SRC.JS_MAIN]),
     uglify(),
     concat('main.js'),
     gulp.dest(config.DEST.JS),
@@ -91,7 +92,7 @@ gulp.task('build:js_form', function(cb) {
 });
 gulp.task('build:js_legalperson', function(cb) {
   pump([
-    gulp.src(config.SRC.JS_LEGALPERSON),
+    gulp.src([config.SRC.JS_GENERAL, config.SRC.JS_LEGALPERSON]),
     uglify(),
     concat('legalperson.js'),
     gulp.dest(config.DEST.JS),
