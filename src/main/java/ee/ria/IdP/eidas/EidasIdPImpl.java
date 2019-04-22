@@ -25,8 +25,10 @@
 
 package ee.ria.IdP.eidas;
 
+import com.google.common.collect.ImmutableSet;
 import ee.ria.IdP.exceptions.InvalidAuthRequest;
 import ee.ria.IdP.metadata.MetaDataConfigurationI;
+import ee.ria.IdP.model.EELegalPerson;
 import ee.ria.IdP.model.EENaturalPerson;
 import eu.eidas.auth.commons.EIDASStatusCode;
 import eu.eidas.auth.commons.EIDASSubStatusCode;
@@ -40,7 +42,9 @@ import eu.eidas.auth.commons.protocol.eidas.IEidasAuthenticationRequest;
 import eu.eidas.auth.commons.protocol.eidas.impl.EidasAuthenticationRequest;
 import eu.eidas.auth.commons.protocol.impl.AuthenticationResponse;
 import eu.eidas.auth.engine.ProtocolEngineI;
+import eu.eidas.auth.engine.core.eidas.spec.LegalPersonSpec;
 import eu.eidas.auth.engine.core.eidas.spec.NaturalPersonSpec;
+import eu.eidas.auth.engine.core.eidas.spec.RepresentativeNaturalPersonSpec;
 import eu.eidas.auth.engine.metadata.MetadataFetcherI;
 import eu.eidas.auth.engine.metadata.MetadataSignerI;
 import eu.eidas.auth.engine.metadata.MetadataUtil;
@@ -52,8 +56,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.print.DocFlavor;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Eidas protocol responder for id provider
@@ -64,7 +68,16 @@ public class EidasIdPImpl implements EidasIdPI {
 
     private static final String OUR_EIDAS_LOA = "http://eidas.europa.eu/LoA/high";
 
-    private static AttributeRegistry EE_ATTRIBUTES;
+    private static final AttributeRegistry EE_NATURAL_PERSON_ATTRIBUTES = AttributeRegistries.of( new AttributeDefinition[]{
+        NaturalPersonSpec.Definitions.PERSON_IDENTIFIER,
+                NaturalPersonSpec.Definitions.CURRENT_FAMILY_NAME,
+                NaturalPersonSpec.Definitions.CURRENT_GIVEN_NAME,
+                NaturalPersonSpec.Definitions.DATE_OF_BIRTH});
+
+    public static final AttributeRegistry EE_LEGAL_PERSON_ATTRIBUTES = AttributeRegistries.of( new AttributeDefinition[]{
+            LegalPersonSpec.Definitions.LEGAL_PERSON_IDENTIFIER,
+            LegalPersonSpec.Definitions.LEGAL_NAME
+    });
 
     private ProtocolEngineI protocolEngine;
     private MetaDataConfigurationI metaDataConfiguration;
@@ -75,13 +88,6 @@ public class EidasIdPImpl implements EidasIdPI {
         this.protocolEngine = protocolEngine;
         this.metadataFetcherI = metadataFetcherI;
         this.metaDataConfiguration = metaDataConfiguration;
-
-        EE_ATTRIBUTES = AttributeRegistries.of( new AttributeDefinition[]{
-                NaturalPersonSpec.Definitions.PERSON_IDENTIFIER,
-                NaturalPersonSpec.Definitions.CURRENT_FAMILY_NAME,
-                NaturalPersonSpec.Definitions.CURRENT_GIVEN_NAME,
-                NaturalPersonSpec.Definitions.DATE_OF_BIRTH});
-
     }
 
     /**
@@ -147,12 +153,18 @@ public class EidasIdPImpl implements EidasIdPI {
     private void checkRequestAttributes(IAuthenticationRequest authRequest) throws InvalidAuthRequest {
         for(AttributeDefinition<?> attributeDefinition : authRequest.getRequestedAttributes().getDefinitions()) {
             if(attributeDefinition.isRequired()) {
-                if(!EE_ATTRIBUTES.contains(attributeDefinition)) {
+                if(!EE_NATURAL_PERSON_ATTRIBUTES.contains(attributeDefinition) && !EE_LEGAL_PERSON_ATTRIBUTES.contains(attributeDefinition)) {
                     LOG.error("Requested mandatory attribute {} is not supported", attributeDefinition.getFriendlyName());
                     throw new InvalidAuthRequest("Requested mandatory attribute " + attributeDefinition.getFriendlyName() +
                             " is not supported.");
                 }
             }
+        }
+
+        ImmutableSet<AttributeDefinition<?>> requestedAttributes = authRequest.getRequestedAttributes().getAttributeMap().keySet();
+        if (!Collections.disjoint(requestedAttributes, EidasIdPImpl.EE_NATURAL_PERSON_ATTRIBUTES.getAttributes()) && !Collections.disjoint(requestedAttributes, EidasIdPImpl.EE_LEGAL_PERSON_ATTRIBUTES.getAttributes())) {
+            LOG.error("Cannot request attributes from both natural person and legal person attribute sets.");
+            throw new InvalidAuthRequest("Cannot request attributes from both natural person and legal person attribute sets.");
         }
     }
 
@@ -184,6 +196,11 @@ public class EidasIdPImpl implements EidasIdPI {
         builder.put(attr, new DateTimeAttributeValue(value));
     }
 
+    public String buildAuthenticationResponse(IAuthenticationRequest authRequest,
+                                              EENaturalPerson naturalPerson) {
+        return buildAuthenticationResponse(authRequest, naturalPerson, null);
+    }
+
     /**
      * Builds successful authentication response
      * @param authRequest original authentication request
@@ -191,21 +208,38 @@ public class EidasIdPImpl implements EidasIdPI {
      * @return Base64 encoded response message
      */
     public String buildAuthenticationResponse(IAuthenticationRequest authRequest,
-                                                 EENaturalPerson naturalPerson) {
+                                              EENaturalPerson naturalPerson, EELegalPerson legalPerson) {
+
         AuthenticationResponse.Builder authResponse = createResponseBuilder(authRequest);
         authResponse.statusCode(EIDASStatusCode.SUCCESS_URI.toString());
 
         ImmutableAttributeMap.Builder mapBuilder = ImmutableAttributeMap.builder();
 
-        // for now lets add all attributes we have
-        addStringAttributeValue(mapBuilder, NaturalPersonSpec.Definitions.PERSON_IDENTIFIER,
-                naturalPerson.getIdCode());
-        addStringAttributeValue(mapBuilder, NaturalPersonSpec.Definitions.CURRENT_GIVEN_NAME,
-                naturalPerson.getFirstName());
-        addStringAttributeValue(mapBuilder, NaturalPersonSpec.Definitions.CURRENT_FAMILY_NAME,
-                naturalPerson.getFamilyName());
-        addDateAttributeValue(mapBuilder, NaturalPersonSpec.Definitions.DATE_OF_BIRTH,
-                naturalPerson.getBirthDate());
+
+
+        if (legalPerson != null) {
+            addStringAttributeValue(mapBuilder, RepresentativeNaturalPersonSpec.Definitions.PERSON_IDENTIFIER,
+                    naturalPerson.getIdCode());
+            addStringAttributeValue(mapBuilder, RepresentativeNaturalPersonSpec.Definitions.CURRENT_GIVEN_NAME,
+                    naturalPerson.getFirstName());
+            addStringAttributeValue(mapBuilder, RepresentativeNaturalPersonSpec.Definitions.CURRENT_FAMILY_NAME,
+                    naturalPerson.getFamilyName());
+            addDateAttributeValue(mapBuilder, RepresentativeNaturalPersonSpec.Definitions.DATE_OF_BIRTH,
+                    naturalPerson.getBirthDate());
+            addStringAttributeValue(mapBuilder, LegalPersonSpec.Definitions.LEGAL_NAME,
+                    legalPerson.getLegalName());
+            addStringAttributeValue(mapBuilder, LegalPersonSpec.Definitions.LEGAL_PERSON_IDENTIFIER,
+                    legalPerson.getLegalPersonIdentifier());
+        } else {
+            addStringAttributeValue(mapBuilder, NaturalPersonSpec.Definitions.PERSON_IDENTIFIER,
+                    naturalPerson.getIdCode());
+            addStringAttributeValue(mapBuilder, NaturalPersonSpec.Definitions.CURRENT_GIVEN_NAME,
+                    naturalPerson.getFirstName());
+            addStringAttributeValue(mapBuilder, NaturalPersonSpec.Definitions.CURRENT_FAMILY_NAME,
+                    naturalPerson.getFamilyName());
+            addDateAttributeValue(mapBuilder, NaturalPersonSpec.Definitions.DATE_OF_BIRTH,
+                    naturalPerson.getBirthDate());
+        }
 
         ImmutableAttributeMap attributes = mapBuilder.build();
         authResponse.attributes(attributes);

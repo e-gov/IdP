@@ -23,4 +23,20 @@
     <Parameter name="OrganizationName" value="RIA" override="false"/>
     <Parameter name="OrganizationDisplayName" value="RIA" override="false"/>
     <Parameter name="OrganizationUrl" value="http://ria.ee" override="false"/>
+
+
+    <Parameter name="XroadServerUrl" value="http://localhost/cgi-bin/consumer_proxy" override="false"/>
+
+    <Parameter name="XRoadServiceRoadInstance" value="ee-dev" override="false"/>
+    <Parameter name="XRoadServiceMemberClass" value="GOV" override="false"/>
+    <Parameter name="XRoadServiceMemberCode" value="00000000" override="false"/>
+    <Parameter name="XRoadServiceSubsystemCode" value="arireg" override="false"/>
+
+    <Parameter name="XRoadClientSubSystemRoadInstance" value="ee-dev" override="false"/>
+    <Parameter name="XRoadClientSubSystemMemberClass" value="GOV" override="false"/>
+    <Parameter name="XRoadClientSubSystemMemberCode" value="111111111" override="false"/>
+    <Parameter name="XRoadClientSubSystemSubsystemCode" value="idp" override="false"/>
+
+
+
 </Context>

@@ -23,20 +23,20 @@
  *
  */
 
-package ee.ria.IdP.eidas;
+package ee.ria.IdP.model;
 
-import ee.ria.IdP.exceptions.InvalidAuthRequest;
-import ee.ria.IdP.model.EELegalPerson;
-import ee.ria.IdP.model.EENaturalPerson;
-import eu.eidas.auth.commons.protocol.IAuthenticationRequest;
-import eu.eidas.auth.commons.protocol.IResponseMessage;
-import eu.eidas.engine.exceptions.EIDASSAMLEngineException;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-public interface EidasIdPI {
-    IAuthenticationRequest parseRequest(String samlRequest) throws InvalidAuthRequest;
-    String buildAuthenticationResponse(IAuthenticationRequest authRequest,
-                                       EENaturalPerson naturalPerson);
-    String buildAuthenticationResponse(IAuthenticationRequest authRequest,
-                                       EENaturalPerson naturalPerson, EELegalPerson legalPerson);
-    String buildErrorResponse(IAuthenticationRequest authRequest);
+import java.io.Serializable;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor
+@Getter
+public class EELegalPerson implements Serializable {
+    private final String legalName;
+    private final String legalPersonIdentifier;
 }

@@ -114,5 +114,4 @@ jQuery(function ($) {
 	$('#mobileIdForm input.form-control').on('focus', function(){
 		validateFormFieldValue($(this), function(){return true;});
 	});
-
 });

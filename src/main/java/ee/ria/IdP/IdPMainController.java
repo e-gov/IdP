@@ -26,17 +26,18 @@
 package ee.ria.IdP;
 
 import com.codeborne.security.mobileid.MobileIDSession;
+import com.google.common.base.Splitter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import ee.ria.IdP.eidas.EidasIdPI;
-import ee.ria.IdP.exceptions.IdCardNotFound;
-import ee.ria.IdP.exceptions.InvalidAuthData;
-import ee.ria.IdP.exceptions.InvalidAuthRequest;
-import ee.ria.IdP.exceptions.MobileIdError;
+import ee.ria.IdP.eidas.EidasIdPImpl;
+import ee.ria.IdP.exceptions.*;
 import ee.ria.IdP.metadata.MetaDataI;
 import ee.ria.IdP.mobileid.MobileIDAuthI;
+import ee.ria.IdP.model.EELegalPerson;
 import ee.ria.IdP.model.EENaturalPerson;
 import ee.ria.IdP.model.IdPTokenCacheItem;
+import ee.ria.IdP.xroad.EBusinessRegistryService;
 import eu.eidas.auth.commons.protocol.IAuthenticationRequest;
 import eu.eidas.engine.exceptions.EIDASSAMLEngineException;
 import org.bouncycastle.util.encoders.Base64;
@@ -45,28 +46,38 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
-import sun.security.provider.X509Factory;
-import sun.security.x509.X500Name;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static org.springframework.http.HttpStatus.*;
 
 @Controller
 public class IdPMainController {
+
+    public static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
+    public static final String END_CERT = "-----END CERTIFICATE-----";
     private static final Logger LOG = LoggerFactory.getLogger(IdPMainController.class);
 
     private MetaDataI metaDataI;
     private EidasIdPI eidasIdPI;
     private MobileIDAuthI mobileIDAuth;
+    private EBusinessRegistryService eBusinessRegistryService;
     private Cache<String, IdPTokenCacheItem> tokenCache;
 
     private String baseUrl;
@@ -74,11 +85,12 @@ public class IdPMainController {
     private DateTimeFormatter dateFormatter;
 
     public IdPMainController(MetaDataI metaDataI, EidasIdPI eidasIdPI,
-                             MobileIDAuthI mobileIDAuthI,
+                             MobileIDAuthI mobileIDAuthI, EBusinessRegistryService eBusinessRegistryService,
                              @Value("${TokenExpiration: 200}") long tokenExpiration) {
         this.metaDataI = metaDataI;
         this.eidasIdPI = eidasIdPI;
         this.mobileIDAuth = mobileIDAuthI;
+        this.eBusinessRegistryService = eBusinessRegistryService;
 
         tokenCache = CacheBuilder.newBuilder()
                 .expireAfterWrite( tokenExpiration, TimeUnit.SECONDS)
@@ -129,14 +141,28 @@ public class IdPMainController {
         //EENaturalPerson naturalPerson = new EENaturalPerson("Kiilaspea", "Mati",
         //        "34010111234");
 
-        String response = eidasIdPI.buildAuthenticationResponse(authenticationRequest,naturalPerson);
-
-        model.addAttribute("lang", lang);
-        model.addAttribute("SAMLResponse", response);
-        model.addAttribute( "responseCallback", authenticationRequest.getAssertionConsumerServiceURL());
-
         addPersonAttributes(model, naturalPerson);
-        return "authorize";
+
+
+        boolean isLegalPersonRequest = isLegalPersonRequest(authenticationRequest);
+        if (isLegalPersonRequest) {
+            HttpSession session = request.getSession();
+            session.setAttribute("naturalPerson", naturalPerson);
+            session.setAttribute("samlRequest", authenticationRequest);
+
+            model.addAttribute( "responseCallback", authenticationRequest.getAssertionConsumerServiceURL());
+            model.addAttribute( "SAMLRequest", SAMLRequest);
+            model.addAttribute("SAMLResponse", eidasIdPI.buildErrorResponse(authenticationRequest));
+            model.addAttribute("lang", lang);
+            addPersonAttributes(model, naturalPerson);
+            return "legal-person-select";
+        } else {
+            String response = eidasIdPI.buildAuthenticationResponse(authenticationRequest,naturalPerson);
+            model.addAttribute("lang", lang);
+            model.addAttribute("SAMLResponse", response);
+            model.addAttribute( "responseCallback", authenticationRequest.getAssertionConsumerServiceURL());
+            return "authorize";
+        }
     }
 
     private String fillErrorInfo(Model model, String originalRequest, IAuthenticationRequest authenticationRequest, Exception exception,
@@ -163,6 +189,11 @@ public class IdPMainController {
         model.addAttribute( "surName", naturalPerson.getFamilyName());
         model.addAttribute( "name", naturalPerson.getFirstName());
         model.addAttribute( "birthDate", dateFormatter.print(naturalPerson.getBirthDate()));
+    }
+
+    private void addLegalPersonAttributes(Model model, EELegalPerson legalPerson) {
+        model.addAttribute("legalPersonName", legalPerson.getLegalName());
+        model.addAttribute("legalPersonIdentifier", legalPerson.getLegalPersonIdentifier());
     }
 
     private X509Certificate readClientCertificate(HttpServletRequest request) throws IdCardNotFound, InvalidAuthData {
@@ -196,8 +227,8 @@ public class IdPMainController {
         }
 
             // remove PEM header and footer
-        certHeader = certHeader.substring(X509Factory.BEGIN_CERT.length(),
-                certHeader.length() - X509Factory.END_CERT.length() - 1); // funny things with whitespace
+        certHeader = certHeader.substring(BEGIN_CERT.length(),
+                certHeader.length() - END_CERT.length() - 1); // funny things with whitespace
 
         byte[] decoded = Base64.decode(certHeader);
         try {
@@ -212,22 +243,13 @@ public class IdPMainController {
     }
 
     private EENaturalPerson parseClientCertificate(X509Certificate clientCert) throws InvalidAuthData {
-        String clientName = clientCert.getSubjectX500Principal().getName();
-        String cn = null;
-        try {
-            X500Name x500Name = new X500Name(clientName);
-            cn = x500Name.getCommonName();
-        } catch (IOException e) {
-            LOG.error("Could not parse certificate", e);
-            throw new InvalidAuthData("invalid.cert");
-        }
-        String[] cnfields = cn.split(",");
-        if(cnfields.length != 3) {
-            // should not happen as cert was verified
-            LOG.error("Invalid certificate common name found: {}", cn);
-            throw new InvalidAuthData("invalid.cert");
-        }
-        return new EENaturalPerson(cnfields[0],cnfields[1],cnfields[2]);
+        Map<String, String> params = Splitter.on(", ").withKeyValueSeparator("=").split(
+                clientCert.getSubjectDN().getName()
+        );
+        String surname = params.get("SURNAME");
+        String givenname = params.get("GIVENNAME");
+        String serialnumber = params.get("SERIALNUMBER");
+        return new EENaturalPerson(surname,givenname,serialnumber);
     }
 
     @PostMapping(value="/midwelcome")
@@ -260,10 +282,13 @@ public class IdPMainController {
         try {
             mobileIDSession = mobileIDAuth.startMobileIdAuth(personalCode, phoneNumber);
         } catch (MobileIdError mobileIdError) {
+            LOG.error("DigidocService returned an error: " + mobileIdError.getMessage(), mobileIdError);
             return fillErrorInfo(model, SAMLRequest, authenticationRequest,mobileIdError,"error.mobileid", lang);
         }
 
-        IdPTokenCacheItem cacheItem = new IdPTokenCacheItem(SAMLRequest, authenticationRequest, mobileIDSession);
+
+        boolean isLegalPersonRequest = isLegalPersonRequest(authenticationRequest);
+        IdPTokenCacheItem cacheItem = new IdPTokenCacheItem(SAMLRequest, authenticationRequest, mobileIDSession, isLegalPersonRequest);
         String sessionToken = String.valueOf(cacheItem.getMobileIDSession().sessCode);
         putCacheItem(cacheItem,sessionToken);
 
@@ -272,8 +297,11 @@ public class IdPMainController {
         model.addAttribute( "sessionToken", sessionToken);
         model.addAttribute( "challenge", mobileIDSession.challenge);
         model.addAttribute( "checkUrl", "midstatus?sessionToken=" + cacheItem.getMobileIDSession().sessCode);
+
         return "midwait";
     }
+
+
 
     // needed for test so not private
     void putCacheItem(IdPTokenCacheItem cacheItem, String sessionToken) {
@@ -281,7 +309,7 @@ public class IdPMainController {
     }
 
     @PostMapping(value="/midcheck")
-    public String showMobileIdCheck(@RequestParam(required = false) String sessionToken,
+    public String showMobileIdCheck(HttpServletRequest request, @RequestParam(required = false) String sessionToken,
                                     @RequestParam(required = false) String lang,
                                     Model model) {
         IdPTokenCacheItem cacheItem = tokenCache.getIfPresent(sessionToken);
@@ -300,6 +328,7 @@ public class IdPMainController {
                     return "midwait";
                 }
             } catch (MobileIdError mobileIdError) {
+                LOG.error("DigidocService returned an error: " + mobileIdError.getMessage(), mobileIdError);
                 return fillErrorInfo(model, cacheItem.getOriginalRequest(), cacheItem.getSamlRequest(),mobileIdError,"error.mobileid", lang);
             }
         } else if(cacheItem.getError()!=null) {
@@ -315,15 +344,26 @@ public class IdPMainController {
             return fillErrorInfo(model, cacheItem.getOriginalRequest(), cacheItem.getSamlRequest(), invalidAuthData, "error.general", lang);
         }
 
-        String response = eidasIdPI.buildAuthenticationResponse(cacheItem.getSamlRequest(),naturalPerson);
+        if (cacheItem.isLegalPersonRequest()) {
+            HttpSession session = request.getSession();
+            session.setAttribute("naturalPerson", naturalPerson);
+            session.setAttribute("samlRequest", cacheItem.getSamlRequest());
 
-        model.addAttribute("SAMLResponse", response);
-        model.addAttribute( "responseCallback", cacheItem.getSamlRequest().getAssertionConsumerServiceURL());
-        model.addAttribute("lang", lang);
+            model.addAttribute( "responseCallback", cacheItem.getSamlRequest().getAssertionConsumerServiceURL());
+            model.addAttribute( "SAMLRequest", cacheItem.getOriginalRequest());
+            model.addAttribute("SAMLResponse", eidasIdPI.buildErrorResponse(cacheItem.getSamlRequest()));
+            model.addAttribute("lang", lang);
+            addPersonAttributes(model, naturalPerson);
+            return "legal-person-select";
+        } else {
+            String response = eidasIdPI.buildAuthenticationResponse(cacheItem.getSamlRequest(),naturalPerson);
 
-        addPersonAttributes(model, naturalPerson);
-
-        return "authorize";
+            model.addAttribute("SAMLResponse", response);
+            model.addAttribute( "responseCallback", cacheItem.getSamlRequest().getAssertionConsumerServiceURL());
+            model.addAttribute("lang", lang);
+            addPersonAttributes(model, naturalPerson);
+            return "authorize";
+        }
     }
 
     @GetMapping("/midstatus")
@@ -344,5 +384,73 @@ public class IdPMainController {
         }
 
         return "OK";
+    }
+
+    @GetMapping(value="/legal_person")
+    public ModelAndView fetchLegalPersonsList(HttpServletRequest request) {
+        try {
+            EENaturalPerson naturalPerson = (EENaturalPerson) request.getSession().getAttribute("naturalPerson");
+            if (naturalPerson == null) {
+                return getJsonErrorView(BAD_REQUEST, "Authenticated representative of the legal person was not found in session");
+            }
+
+            List<EELegalPerson> legalPersons = eBusinessRegistryService.executeEsindusV2Service(naturalPerson.getIdCode());
+            if (CollectionUtils.isEmpty(legalPersons)) {
+                return getJsonErrorView(FORBIDDEN, "No related legal persons found for current user");
+            } else {
+                request.getSession().setAttribute("legalPersons", legalPersons);
+                ModelAndView modelAndView = new ModelAndView(new MappingJackson2JsonView(), Collections.singletonMap("legalPersons", legalPersons));
+                modelAndView.setStatus(OK);
+                return modelAndView;
+            }
+
+        } catch (XroadServiceNotAvailable e) {
+            LOG.error("X-road service not available. Error: {}", e.getMessage(), e);
+            return getJsonErrorView(BAD_GATEWAY, "Could not connect to business registry");
+        } catch (Exception e) {
+            LOG.error("Failed to get a list  of legal persons. Error: {}", e.getMessage(), e);
+            return getJsonErrorView(INTERNAL_SERVER_ERROR, "Unexpected technical exception encountered.");
+        }
+    }
+
+    @PostMapping(value="/confirm_legal_person")
+    public String confirmSelectedLegalperson(HttpServletRequest request, @RequestParam(required = true) String legalPersonId,
+                                             Model model)  {
+        LOG.debug("/confirm_legal_person request started");
+
+        try {
+            IAuthenticationRequest authenticationRequest = (IAuthenticationRequest)request.getSession().getAttribute("samlRequest");
+            EENaturalPerson naturalPerson = (EENaturalPerson)request.getSession().getAttribute("naturalPerson");
+            List<EELegalPerson> legalPersons = (List)request.getSession().getAttribute("legalPersons");
+            Assert.notNull(legalPersons,"Cannot select a legal person. No legalPersons list found in session");
+            Optional<EELegalPerson> selectedLegalPerson = legalPersons.stream().filter(e -> e.getLegalPersonIdentifier().equals(legalPersonId)).findFirst();
+
+            if (selectedLegalPerson.isPresent()) {
+                String samlResponse = eidasIdPI.buildAuthenticationResponse(authenticationRequest, naturalPerson, selectedLegalPerson.get());
+                model.addAttribute("SAMLResponse", samlResponse);
+                model.addAttribute("responseCallback", authenticationRequest.getAssertionConsumerServiceURL());
+                addPersonAttributes(model, naturalPerson);
+                addLegalPersonAttributes(model, selectedLegalPerson.get());
+                LOG.debug("/confirm_legal_person request complete");
+                return "authorize";
+            } else {
+                throw new IllegalStateException("No legal person found with this id '" + legalPersonId + "'");
+            }
+
+        } finally {
+            request.getSession().invalidate();
+        }
+    }
+
+    private ModelAndView getJsonErrorView(HttpStatus statusCode, String errorMessage) {
+        Map<String, String> map = new HashMap<>();
+        map.put("error", errorMessage);
+        ModelAndView mv = new ModelAndView(new MappingJackson2JsonView(), map);
+        mv.setStatus(statusCode);
+        return mv;
+    }
+
+    private boolean isLegalPersonRequest(IAuthenticationRequest authenticationRequest) {
+        return authenticationRequest.getRequestedAttributes().getAttributeMap().keySet().containsAll(EidasIdPImpl.EE_LEGAL_PERSON_ATTRIBUTES.getAttributes());
     }
 }
