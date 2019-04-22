@@ -56,34 +56,34 @@ public class EBusinessRegistryServiceTest {
     @Test
     public void getSoapRequestSuccessful() {
         String nonce = UUID.randomUUID().toString();
-        Assert.assertEquals("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xro=\"http://x-road.eu/xsd/xroad.xsd\" xmlns:iden=\"http://x-road.eu/xsd/identifiers\" xmlns:prod=\"http://arireg.x-road.eu/producer/\">\r\n" +
-                "   <soapenv:Header>\r\n" +
-                "      <xro:protocolVersion>4.0</xro:protocolVersion>\r\n" +
-                "      <xro:userId>EE$&lt;&gt;&quot;&apos;12345678-90</xro:userId>\r\n" +
-                "      <xro:id>" + nonce + "</xro:id>\r\n" +
-                "      <xro:service iden:objectType=\"SERVICE\">\r\n" +
-                "         <iden:xRoadInstance>ee-dev</iden:xRoadInstance>\r\n" +
-                "         <iden:memberClass>GOV</iden:memberClass>\r\n" +
-                "         <iden:memberCode>70000310</iden:memberCode>\r\n" +
-                "         <iden:subsystemCode>arireg</iden:subsystemCode>\r\n" +
-                "         <iden:serviceCode>esindus_v2</iden:serviceCode>\r\n" +
-                "         <iden:serviceVersion>v1</iden:serviceVersion>\r\n" +
-                "      </xro:service>\r\n" +
-                "      <xro:client iden:objectType=\"SUBSYSTEM\">\r\n" +
-                "         <iden:xRoadInstance>ee-dev</iden:xRoadInstance>\r\n" +
-                "         <iden:memberClass>GOV</iden:memberClass>\r\n" +
-                "         <iden:memberCode>70006317</iden:memberCode>\r\n" +
-                "         <iden:subsystemCode>idp</iden:subsystemCode>\r\n" +
-                "      </xro:client>\r\n" +
-                "   </soapenv:Header>\r\n" +
-                "   <soapenv:Body>\r\n" +
-                "      <prod:esindus_v2>\r\n" +
-                "         <prod:keha>\r\n" +
-                "                <prod:fyysilise_isiku_kood>$&lt;&gt;&quot;&apos;12345678-90</prod:fyysilise_isiku_kood>\r\n" +
-                "                <prod:fyysilise_isiku_koodi_riik>EST</prod:fyysilise_isiku_koodi_riik>\r\n" +
-                "         </prod:keha>\r\n" +
-                "      </prod:esindus_v2>\r\n" +
-                "   </soapenv:Body>\r\n" +
+        Assert.assertEquals("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xro=\"http://x-road.eu/xsd/xroad.xsd\" xmlns:iden=\"http://x-road.eu/xsd/identifiers\" xmlns:prod=\"http://arireg.x-road.eu/producer/\">\n" +
+                "   <soapenv:Header>\n" +
+                "      <xro:protocolVersion>4.0</xro:protocolVersion>\n" +
+                "      <xro:userId>EE$&lt;&gt;&quot;&apos;12345678-90</xro:userId>\n" +
+                "      <xro:id>" + nonce + "</xro:id>\n" +
+                "      <xro:service iden:objectType=\"SERVICE\">\n" +
+                "         <iden:xRoadInstance>ee-dev</iden:xRoadInstance>\n" +
+                "         <iden:memberClass>GOV</iden:memberClass>\n" +
+                "         <iden:memberCode>70000310</iden:memberCode>\n" +
+                "         <iden:subsystemCode>arireg</iden:subsystemCode>\n" +
+                "         <iden:serviceCode>esindus_v2</iden:serviceCode>\n" +
+                "         <iden:serviceVersion>v1</iden:serviceVersion>\n" +
+                "      </xro:service>\n" +
+                "      <xro:client iden:objectType=\"SUBSYSTEM\">\n" +
+                "         <iden:xRoadInstance>ee-dev</iden:xRoadInstance>\n" +
+                "         <iden:memberClass>GOV</iden:memberClass>\n" +
+                "         <iden:memberCode>70006317</iden:memberCode>\n" +
+                "         <iden:subsystemCode>idp</iden:subsystemCode>\n" +
+                "      </xro:client>\n" +
+                "   </soapenv:Header>\n" +
+                "   <soapenv:Body>\n" +
+                "      <prod:esindus_v2>\n" +
+                "         <prod:keha>\n" +
+                "                <prod:fyysilise_isiku_kood>$&lt;&gt;&quot;&apos;12345678-90</prod:fyysilise_isiku_kood>\n" +
+                "                <prod:fyysilise_isiku_koodi_riik>EST</prod:fyysilise_isiku_koodi_riik>\n" +
+                "         </prod:keha>\n" +
+                "      </prod:esindus_v2>\n" +
+                "   </soapenv:Body>\n" +
                 "</soapenv:Envelope>",
                 eBusinessRegistryService.getEsindusV2Request("$<>\"'12345678-90", nonce));
     }
