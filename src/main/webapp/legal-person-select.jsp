@@ -9,7 +9,12 @@
             <%@ include file="/include/header-bar.jspf" %>
             <%@ include file="/include/header.jspf" %>
             <div class="container">
-
+                <noscript>
+                    <div class="alert alert-error">
+                        <p><strong><spring:message code="message.warning.noscript" /></strong></p>
+                    </div>
+                    <br>
+                </noscript>
                 <div class="alert alert-neutral">
 
                     <h2><spring:message code="html.auth.legalperson-representative"/></h2>
