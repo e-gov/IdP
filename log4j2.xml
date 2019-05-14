@@ -33,6 +33,13 @@
     </Appenders>
 
     <Loggers>
+
+        <Logger name="IdpStatistics" level="INFO" additivity="false">
+            <AppenderRef ref="idpFile"/>
+
+            <!-- Uncomment when using syslog appender and wanting to send ee.ria.IdP events to syslog -->
+            <!--<AppenderRef ref="idpSyslog"/>-->
+        </Logger>
         <Logger name="ee.ria.IdP" level="INFO" additivity="false">
             <AppenderRef ref="idpFile"/>
 
