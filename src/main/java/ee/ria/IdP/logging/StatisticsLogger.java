@@ -1,5 +1,6 @@
 package ee.ria.IdP.logging;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class StatisticsLogger {
 
     @Getter
     @Builder
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     static class LogEvent {
         private String personType;
         private String eventType;
@@ -30,7 +32,6 @@ public class StatisticsLogger {
         private String country;
         private String error;
     }
-
 
     public static void logEvent(PersonType personType, EventType eventType, AuthType authType, String originCountryCode) {
         try {

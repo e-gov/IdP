@@ -160,3 +160,34 @@ Et näidiskonfiguratsioon (või ka ise kirjutatud seadistus) rakenduks, tuleb ko
 ```
 export JAVA_OPTS="-Dlog4j2.configurationFile=file:/opt/tomcat/conf/log4j2.xml"
 ```
+
+### 5.3 Statistikalogi
+
+
+Statistikalogi eesmärk on koguda andmeid IdP kasutusstatistika koostamiseks. Statistikalogisse ei salvestata isikuandmeid.
+
+Logikirjes sisalduva `logger` elemendi väärtus on alati `IdpStatistics` ning `message` elemendi sisu logitakse json kujul.
+
+Logitava JSON kirje formaat on järgmine:
+
+| Atribuut          | Kirjeldus |
+| :---------------- | :-------- |
+| `personType` | Autenditava isiku tüüp. Võimalikud väärtused: `NATURAL_PERSON` - füüsiline isik või `LEGAL_PERSON_REPRESENTATIVE` - füüsiline isik, kes esindab juriidilist isikut  |
+| `eventType` | Sündmuse liik. Võimalikud väärtused: `AUTHENTICATION_STARTED`, `AUTHENTICATION_SUCCESSFUL`, `AUTHENTICATION_FAILED` |
+| `authType` | Kasutaja tuvastamiseks kasutatud autentimisvahendi tüüp. Võimalikud väärtused: `ID_CARD`, `MID` |
+| `country` | Autentimise algatanud riigi kood. Peab vastama mustrile `^A-Z{2,2}$` |
+| `error` | Vea kood. Täidetud ainult juhul kui `eventType` väärtus on `AUTHENTICATION_FAILED` |
+
+
+Näide: edukas ID-kaardiga autentimine
+````
+{"date":"2019-05-16T13:36:23,380+0000", "level":"INFO", "logger":"IdpStatistics", "thread":"localhost-startStop-1", "instance":"IdP-instance-1", "message":"{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_STARTED\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}"}
+{"date":"2019-05-16T13:37:19,110+0000", "level":"INFO", "logger":"IdpStatistics", "thread":"localhost-startStop-1", "instance":"IdP-instance-1", "message":"{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_SUCCESSFUL\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}"}
+````
+
+Näide: viga ID-kaardiga autentimisel
+````
+{"date":"2019-05-16T13:36:23,380+0000", "level":"INFO", "logger":"IdpStatistics", "thread":"localhost-startStop-1", "instance":"IdP-instance-1", "message":"{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_STARTED\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}"}
+{"date":"2019-05-16T13:36:23,380+0000", "level":"INFO", "logger":"IdpStatistics", "thread":"localhost-startStop-1", "instance":"IdP-instance-1", "message":"{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_FAILED\",\"authType\":\"ID_CARD\",\"country\":\"ET\",\"error\":\"error.idcard.notfound\"}"}
+
+````

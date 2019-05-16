@@ -1,7 +1,6 @@
 package ee.ria.IdP;
 
 import com.codeborne.security.mobileid.MobileIDSession;
-import ee.ria.IdP.eidas.EidasIdPI;
 import ee.ria.IdP.eidas.EidasIdPImpl;
 import ee.ria.IdP.exceptions.InvalidAuthData;
 import ee.ria.IdP.exceptions.InvalidAuthRequest;
@@ -14,16 +13,10 @@ import ee.ria.IdP.xroad.EBusinessRegistryService;
 import eu.eidas.auth.commons.attribute.ImmutableAttributeMap;
 import eu.eidas.engine.exceptions.EIDASSAMLEngineException;
 import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.*;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.MockitoRule;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.ui.ExtendedModelMap;
@@ -41,6 +34,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.*;
 
 public class MainControllerTest {
+
+    @Rule public LogAppenderResource statisticsLogAppender = new LogAppenderResource("IdpStatistics");
+
     private IdPMainController idPMainController;
 
     private MetaDataIMock metaDataIMock;
@@ -78,6 +74,8 @@ public class MainControllerTest {
         assertEquals("welcome", view);
         assertTrue(mockModel.containsAttribute("SAMLRequest"));
         assertEquals("not_used_by_mock", mockModel.asMap().get("SAMLRequest"));
+
+        assertEquals("statistics log contains invalid number of records", 0, statisticsLogAppender.getOutput().size());
     }
 
     @Test
@@ -91,6 +89,10 @@ public class MainControllerTest {
         assertEquals("authorize", view);
         assertTrue(mockModel.containsAttribute("SAMLResponse"));
         assertEquals("mock_response", mockModel.asMap().get("SAMLResponse"));
+
+        assertEquals("statistics log contains invalid number of records", 2, statisticsLogAppender.getOutput().size());
+        assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_STARTED\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(0).getMessage().getFormattedMessage());
+        assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_SUCCESSFUL\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(1).getMessage().getFormattedMessage());
     }
 
     @Test
@@ -118,6 +120,10 @@ public class MainControllerTest {
         assertEquals("1970.05.06", ((EENaturalPerson)httpServletRequest.getSession().getAttribute("naturalPerson")).getBirthDate().toString(DateTimeFormat.forPattern("yyyy.MM.dd")));
         assertNotNull("Must contain samlRequest attribute in session!",httpServletRequest.getSession().getAttribute("samlRequest"));
         assertEquals("mock_error_response", mockModel.asMap().get("SAMLResponse"));
+
+        assertEquals("statistics log contains invalid number of records", 2, statisticsLogAppender.getOutput().size());
+        assertEquals("{\"personType\":\"LEGAL_PERSON_REPRESENTATIVE\",\"eventType\":\"AUTHENTICATION_STARTED\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(0).getMessage().getFormattedMessage());
+        assertEquals("{\"personType\":\"LEGAL_PERSON_REPRESENTATIVE\",\"eventType\":\"AUTHENTICATION_SUCCESSFUL\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(1).getMessage().getFormattedMessage());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -126,8 +132,14 @@ public class MainControllerTest {
         mockRequest.addHeader( "SSL_CLIENT_CERT", idcardCert);
 
         Model mockModel = new ExtendedModelMap();
-        String view = idPMainController.authenticate(mockRequest, "not_used_by_mock", null, mockModel );
-        assertEquals("authorize", view);
+        try {
+            idPMainController.authenticate(mockRequest, "not_used_by_mock", null, mockModel);
+            fail("Should not reach this");
+        } catch (Exception e) {
+            assertEquals("statistics log contains invalid number of records", 1, statisticsLogAppender.getOutput().size());
+            assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_STARTED\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(0).getMessage().getFormattedMessage());
+            throw e;
+        }
     }
 
     @Test
@@ -140,6 +152,10 @@ public class MainControllerTest {
         assertEquals("error", view);
         assertTrue(mockModel.containsAttribute("SAMLResponse"));
         assertEquals("mock_error_response", mockModel.asMap().get("SAMLResponse"));
+
+        assertEquals("statistics log contains invalid number of records", 2, statisticsLogAppender.getOutput().size());
+        assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_STARTED\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(0).getMessage().getFormattedMessage());
+        assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_FAILED\",\"authType\":\"ID_CARD\",\"country\":\"ET\",\"error\":\"error.idcard.notfound\"}", statisticsLogAppender.getOutput().get(1).getMessage().getFormattedMessage());
     }
 
     @Test
@@ -149,6 +165,8 @@ public class MainControllerTest {
         assertEquals("midstart", view);
         assertTrue(mockModel.containsAttribute("SAMLRequest"));
         assertEquals("not_used_by_mock", mockModel.asMap().get("SAMLRequest"));
+
+        assertEquals("statistics log contains invalid number of records", 0, statisticsLogAppender.getOutput().size());
     }
 
     @Test
@@ -164,6 +182,9 @@ public class MainControllerTest {
         assertEquals("mock_challenge", mockModel.asMap().get("challenge"));
 
         assertTrue(mockModel.containsAttribute("checkUrl"));
+
+        assertEquals("statistics log contains invalid number of records", 1, statisticsLogAppender.getOutput().size());
+        assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_STARTED\",\"authType\":\"MID\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(0).getMessage().getFormattedMessage());
     }
 
     @Test
@@ -174,6 +195,10 @@ public class MainControllerTest {
         assertEquals("error", view);
         assertTrue(mockModel.containsAttribute("SAMLResponse"));
         assertEquals("mock_error_response", mockModel.asMap().get("SAMLResponse"));
+
+        assertEquals("statistics log contains invalid number of records", 2, statisticsLogAppender.getOutput().size());
+        assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_STARTED\",\"authType\":\"MID\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(0).getMessage().getFormattedMessage());
+        assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_FAILED\",\"authType\":\"MID\",\"country\":\"ET\",\"error\":\"error.mobileid\"}", statisticsLogAppender.getOutput().get(1).getMessage().getFormattedMessage());
     }
 
     @Test
@@ -184,6 +209,10 @@ public class MainControllerTest {
         assertEquals("error", view);
         assertTrue(mockModel.containsAttribute("SAMLResponse"));
         assertEquals("mock_error_response", mockModel.asMap().get("SAMLResponse"));
+
+        assertEquals("statistics log contains invalid number of records", 2, statisticsLogAppender.getOutput().size());
+        assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_STARTED\",\"authType\":\"MID\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(0).getMessage().getFormattedMessage());
+        assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_FAILED\",\"authType\":\"MID\",\"country\":\"ET\",\"error\":\"error.mobileid\"}", statisticsLogAppender.getOutput().get(1).getMessage().getFormattedMessage());
     }
 
     @Test
@@ -197,6 +226,9 @@ public class MainControllerTest {
         assertEquals("authorize", view);
         assertTrue(mockModel.containsAttribute("SAMLResponse"));
         assertEquals("mock_response", mockModel.asMap().get("SAMLResponse"));
+
+        assertEquals("statistics log contains invalid number of records", 1, statisticsLogAppender.getOutput().size());
+        assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_SUCCESSFUL\",\"authType\":\"MID\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(0).getMessage().getFormattedMessage());
     }
 
     @Test
@@ -215,6 +247,9 @@ public class MainControllerTest {
         assertEquals("1960.02.12", ((EENaturalPerson)httpServletRequest.getSession().getAttribute("naturalPerson")).getBirthDate().toString(DateTimeFormat.forPattern("yyyy.MM.dd")));
         assertNotNull("Must contain samlRequest attribute in session!",httpServletRequest.getSession().getAttribute("samlRequest"));
         assertEquals("mock_error_response", mockModel.asMap().get("SAMLResponse"));
+
+        assertEquals("statistics log contains invalid number of records", 1, statisticsLogAppender.getOutput().size());
+        assertEquals("{\"personType\":\"LEGAL_PERSON_REPRESENTATIVE\",\"eventType\":\"AUTHENTICATION_SUCCESSFUL\",\"authType\":\"MID\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(0).getMessage().getFormattedMessage());
     }
 
     @Test
@@ -229,6 +264,9 @@ public class MainControllerTest {
         assertEquals("authorize", view);
         assertTrue(mockModel.containsAttribute("SAMLResponse"));
         assertEquals("mock_response", mockModel.asMap().get("SAMLResponse"));
+
+        assertEquals("statistics log contains invalid number of records", 1, statisticsLogAppender.getOutput().size());
+        assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_SUCCESSFUL\",\"authType\":\"MID\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(0).getMessage().getFormattedMessage());
     }
 
     @Test
@@ -236,12 +274,16 @@ public class MainControllerTest {
         Model mockModel = new ExtendedModelMap();
         String view = idPMainController.showMobileIdCheck( new MockHttpServletRequest(),"not_used_by_mock", null, mockModel );
         assertEquals("fatal_error", view);
+
+        assertEquals("statistics log contains invalid number of records", 0, statisticsLogAppender.getOutput().size());
     }
 
     @Test
     public void midstatusError() {
         String status = idPMainController.getMobileIdStatus("missing");
         assertEquals("ERROR", status);
+
+        assertEquals("statistics log contains invalid number of records", 0, statisticsLogAppender.getOutput().size());
     }
 
     @Test
@@ -253,6 +295,8 @@ public class MainControllerTest {
 
         String status = idPMainController.getMobileIdStatus("mock_token");
         assertEquals("WAIT", status);
+
+        assertEquals("statistics log contains invalid number of records", 0, statisticsLogAppender.getOutput().size());
     }
 
     @Test
@@ -264,6 +308,8 @@ public class MainControllerTest {
         idPMainController.putCacheItem(cacheItem, "mock_token");
         String status = idPMainController.getMobileIdStatus("mock_token");
         assertEquals("OK", status);
+
+        assertEquals("statistics log contains invalid number of records", 0, statisticsLogAppender.getOutput().size());
     }
 
     @Test
@@ -296,6 +342,8 @@ public class MainControllerTest {
         ModelAndView modelAndView = idPMainController.fetchLegalPersonsList(mockRequest);
         assertEquals(INTERNAL_SERVER_ERROR, modelAndView.getStatus());
         assertEquals("Unexpected technical exception encountered.", modelAndView.getModel().get("error"));
+
+        assertEquals("statistics log contains invalid number of records", 0, statisticsLogAppender.getOutput().size());
     }
 
     @Test
@@ -308,6 +356,8 @@ public class MainControllerTest {
         ModelAndView modelAndView = idPMainController.fetchLegalPersonsList(mockRequest);
         assertEquals(FORBIDDEN, modelAndView.getStatus());
         assertEquals("No related legal persons found for current user", modelAndView.getModel().get("error"));
+
+        assertEquals("statistics log contains invalid number of records", 0, statisticsLogAppender.getOutput().size());
     }
 
     @Test
@@ -322,6 +372,8 @@ public class MainControllerTest {
         assertEquals(OK, modelAndView.getStatus());
         assertEquals(results, modelAndView.getModel().get("legalPersons"));
         assertEquals(results, (List<EELegalPerson>)mockRequest.getSession().getAttribute("legalPersons"));
+
+        assertEquals("statistics log contains invalid number of records", 0, statisticsLogAppender.getOutput().size());
     }
 
     @Test
@@ -334,6 +386,7 @@ public class MainControllerTest {
         } catch (Exception e) {
             Assert.assertEquals("Cannot select a legal person. No legalPersons list found in session", e.getMessage());
             assertSessionCleanup(mockRequest);
+            assertEquals("statistics log contains invalid number of records", 0, statisticsLogAppender.getOutput().size());
         }
     }
 
@@ -349,6 +402,7 @@ public class MainControllerTest {
         } catch (Exception e) {
             Assert.assertEquals("No legal person found with this id 'mock-legalperson-id-2'", e.getMessage());
             assertSessionCleanup(mockRequest);
+            assertEquals("statistics log contains invalid number of records", 0, statisticsLogAppender.getOutput().size());
         }
     }
 
@@ -373,6 +427,8 @@ public class MainControllerTest {
         assertEquals("mock-legalperson-id-1", mockModel.asMap().get("legalPersonIdentifier"));
 
         assertSessionCleanup(mockRequest);
+
+        assertEquals("statistics log contains invalid number of records", 0, statisticsLogAppender.getOutput().size());
     }
 
     private void assertSessionCleanup(MockHttpServletRequest mockRequest) {
@@ -380,5 +436,4 @@ public class MainControllerTest {
         assertNull(mockRequest.getSession().getAttribute("samlRequest"));
         assertNull(mockRequest.getSession().getAttribute("naturalPerson"));
     }
-
 }
