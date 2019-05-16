@@ -146,7 +146,7 @@ public class IdPMainController {
 
         boolean isLegalPersonRequest = isLegalPersonRequest(authenticationRequest);
         if (isLegalPersonRequest) {
-            HttpSession session = request.getSession();
+            HttpSession session = request.getSession(true);
             session.setAttribute("naturalPerson", naturalPerson);
             session.setAttribute("samlRequest", authenticationRequest);
 
@@ -226,9 +226,8 @@ public class IdPMainController {
             throw new IllegalStateException("SSL_CLIENT_CERT header not found");
         }
 
-            // remove PEM header and footer
-        certHeader = certHeader.substring(BEGIN_CERT.length(),
-                certHeader.length() - END_CERT.length() - 1); // funny things with whitespace
+        // remove PEM header and footer
+        certHeader = certHeader.replaceAll(BEGIN_CERT, "").replaceAll(END_CERT, "").trim();
 
         byte[] decoded = Base64.decode(certHeader);
         try {
@@ -345,7 +344,7 @@ public class IdPMainController {
         }
 
         if (cacheItem.isLegalPersonRequest()) {
-            HttpSession session = request.getSession();
+            HttpSession session = request.getSession(true);
             session.setAttribute("naturalPerson", naturalPerson);
             session.setAttribute("samlRequest", cacheItem.getSamlRequest());
 
