@@ -106,7 +106,7 @@ public class EidasIdPImpl implements EidasIdPI {
         IAuthenticationRequest authRequest;
         try {
             authRequest = protocolEngine.unmarshallRequestAndValidate(Base64.decode(samlRequest),
-                    metaDataConfiguration.getLocalCountry());
+                    metaDataConfiguration.getLocalCountry(), new ArrayList<>(), false);
         }
         catch(EIDASSAMLEngineException e) {
             LOG.error("Error decoding SamlRequest", e);

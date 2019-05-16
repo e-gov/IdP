@@ -8,7 +8,7 @@ jQuery(function ($) {
             url: "/IdP/legal_person",
             beforeSend: function() {
                 setup();
-            })
+            }
         }).done( function (json) {
             handleSuccessfulResult(json);
         }).fail ( function (jqXHR, textStatus) {

@@ -11,7 +11,7 @@
     <parent>
         <groupId>eu.eidas</groupId>
         <artifactId>eidas-parent</artifactId>
-        <version>1.4.0</version>
+        <version>1.4.5</version>
         <relativePath>../EIDAS-Parent/pom.xml</relativePath>
     </parent>
     <dependencies>
@@ -49,9 +49,14 @@
             <artifactId>hazelcast-wm</artifactId>
         </dependency>
         <!-- TEST -->
+        <!--<dependency>-->
+            <!--<groupId>org.slf4j</groupId>-->
+            <!--<artifactId>slf4j-log4j12</artifactId>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

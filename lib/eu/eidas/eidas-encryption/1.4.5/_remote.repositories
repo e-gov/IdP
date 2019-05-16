@@ -1,0 +1,6 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Tue May 14 17:58:27 EEST 2019
+eidas-encryption-1.4.5.pom>=
+eidas-encryption-1.4.5-sources.jar>=
+eidas-encryption-1.4.5-javadoc.jar>=
+eidas-encryption-1.4.5.jar>=
