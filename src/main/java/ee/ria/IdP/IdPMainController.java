@@ -32,11 +32,10 @@ import com.google.common.cache.CacheBuilder;
 import ee.ria.IdP.eidas.EidasIdPI;
 import ee.ria.IdP.eidas.EidasIdPImpl;
 import ee.ria.IdP.exceptions.*;
+import ee.ria.IdP.logging.StatisticsLogger;
 import ee.ria.IdP.metadata.MetaDataI;
 import ee.ria.IdP.mobileid.MobileIDAuthI;
-import ee.ria.IdP.model.EELegalPerson;
-import ee.ria.IdP.model.EENaturalPerson;
-import ee.ria.IdP.model.IdPTokenCacheItem;
+import ee.ria.IdP.model.*;
 import ee.ria.IdP.xroad.EBusinessRegistryService;
 import eu.eidas.auth.commons.protocol.IAuthenticationRequest;
 import eu.eidas.engine.exceptions.EIDASSAMLEngineException;
@@ -65,6 +64,12 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static ee.ria.IdP.logging.StatisticsLogger.AuthType.ID_CARD;
+import static ee.ria.IdP.logging.StatisticsLogger.AuthType.MID;
+import static ee.ria.IdP.logging.StatisticsLogger.EventType.AUTHENTICATION_STARTED;
+import static ee.ria.IdP.logging.StatisticsLogger.EventType.AUTHENTICATION_SUCCESSFUL;
+import static ee.ria.IdP.logging.StatisticsLogger.PersonType.LEGAL_PERSON_REPRESENTATIVE;
+import static ee.ria.IdP.logging.StatisticsLogger.PersonType.NATURAL_PERSON;
 import static org.springframework.http.HttpStatus.*;
 
 @Controller
@@ -79,8 +84,6 @@ public class IdPMainController {
     private MobileIDAuthI mobileIDAuth;
     private EBusinessRegistryService eBusinessRegistryService;
     private Cache<String, IdPTokenCacheItem> tokenCache;
-
-    private String baseUrl;
 
     private DateTimeFormatter dateFormatter;
 
@@ -128,6 +131,10 @@ public class IdPMainController {
                                Model model) throws InvalidAuthRequest {
         IAuthenticationRequest authenticationRequest = eidasIdPI.parseRequest(SAMLRequest);
 
+
+        boolean isLegalPersonRequest = isLegalPersonRequest(authenticationRequest);
+        StatisticsLogger.logEvent(isLegalPersonRequest ? LEGAL_PERSON_REPRESENTATIVE : NATURAL_PERSON, AUTHENTICATION_STARTED, ID_CARD, authenticationRequest.getOriginCountryCode());
+
         EENaturalPerson naturalPerson;
         try {
             X509Certificate clientCert = readClientCertificate(request);
@@ -138,13 +145,8 @@ public class IdPMainController {
             return fillErrorInfo(model, SAMLRequest, authenticationRequest, invalidAuthData, "error.general", lang);
         }
 
-        //EENaturalPerson naturalPerson = new EENaturalPerson("Kiilaspea", "Mati",
-        //        "34010111234");
-
         addPersonAttributes(model, naturalPerson);
 
-
-        boolean isLegalPersonRequest = isLegalPersonRequest(authenticationRequest);
         if (isLegalPersonRequest) {
             HttpSession session = request.getSession(true);
             session.setAttribute("naturalPerson", naturalPerson);
@@ -155,12 +157,14 @@ public class IdPMainController {
             model.addAttribute("SAMLResponse", eidasIdPI.buildErrorResponse(authenticationRequest));
             model.addAttribute("lang", lang);
             addPersonAttributes(model, naturalPerson);
+            StatisticsLogger.logEvent(LEGAL_PERSON_REPRESENTATIVE, AUTHENTICATION_SUCCESSFUL, ID_CARD, authenticationRequest.getOriginCountryCode());
             return "legal-person-select";
         } else {
             String response = eidasIdPI.buildAuthenticationResponse(authenticationRequest,naturalPerson);
             model.addAttribute("lang", lang);
             model.addAttribute("SAMLResponse", response);
             model.addAttribute( "responseCallback", authenticationRequest.getAssertionConsumerServiceURL());
+            StatisticsLogger.logEvent(NATURAL_PERSON, AUTHENTICATION_SUCCESSFUL, ID_CARD, authenticationRequest.getOriginCountryCode());
             return "authorize";
         }
     }
@@ -181,6 +185,7 @@ public class IdPMainController {
         model.addAttribute("lang", lang);
         model.addAttribute( "errorMessageCode", errorMessageCode);
 
+        StatisticsLogger.logErrorEvent(errorMessageCode);
         return "error";
     }
 
@@ -269,6 +274,8 @@ public class IdPMainController {
                                     @RequestParam(required = false) String phoneNumber,
                                     Model model) throws InvalidAuthRequest {
         IAuthenticationRequest authenticationRequest = eidasIdPI.parseRequest(SAMLRequest);
+        boolean isLegalPersonRequest = isLegalPersonRequest(authenticationRequest);
+        StatisticsLogger.logEvent(isLegalPersonRequest ? LEGAL_PERSON_REPRESENTATIVE : NATURAL_PERSON, AUTHENTICATION_STARTED, MID, authenticationRequest.getOriginCountryCode());
 
         if (personalCode == null) {
             return fillErrorInfo(model, SAMLRequest, authenticationRequest, null, "error.personal.code", lang);
@@ -286,7 +293,7 @@ public class IdPMainController {
         }
 
 
-        boolean isLegalPersonRequest = isLegalPersonRequest(authenticationRequest);
+
         IdPTokenCacheItem cacheItem = new IdPTokenCacheItem(SAMLRequest, authenticationRequest, mobileIDSession, isLegalPersonRequest);
         String sessionToken = String.valueOf(cacheItem.getMobileIDSession().sessCode);
         putCacheItem(cacheItem,sessionToken);
@@ -353,6 +360,7 @@ public class IdPMainController {
             model.addAttribute("SAMLResponse", eidasIdPI.buildErrorResponse(cacheItem.getSamlRequest()));
             model.addAttribute("lang", lang);
             addPersonAttributes(model, naturalPerson);
+            StatisticsLogger.logEvent(LEGAL_PERSON_REPRESENTATIVE, AUTHENTICATION_SUCCESSFUL, MID, cacheItem.getSamlRequest().getOriginCountryCode());
             return "legal-person-select";
         } else {
             String response = eidasIdPI.buildAuthenticationResponse(cacheItem.getSamlRequest(),naturalPerson);
@@ -361,6 +369,8 @@ public class IdPMainController {
             model.addAttribute( "responseCallback", cacheItem.getSamlRequest().getAssertionConsumerServiceURL());
             model.addAttribute("lang", lang);
             addPersonAttributes(model, naturalPerson);
+
+            StatisticsLogger.logEvent(NATURAL_PERSON, AUTHENTICATION_SUCCESSFUL, MID, cacheItem.getSamlRequest().getOriginCountryCode());
             return "authorize";
         }
     }
