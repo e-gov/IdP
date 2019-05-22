@@ -66,8 +66,7 @@ import java.util.concurrent.TimeUnit;
 
 import static ee.ria.IdP.logging.StatisticsLogger.AuthType.ID_CARD;
 import static ee.ria.IdP.logging.StatisticsLogger.AuthType.MID;
-import static ee.ria.IdP.logging.StatisticsLogger.EventType.AUTHENTICATION_STARTED;
-import static ee.ria.IdP.logging.StatisticsLogger.EventType.AUTHENTICATION_SUCCESSFUL;
+import static ee.ria.IdP.logging.StatisticsLogger.EventType.*;
 import static ee.ria.IdP.logging.StatisticsLogger.PersonType.LEGAL_PERSON_REPRESENTATIVE;
 import static ee.ria.IdP.logging.StatisticsLogger.PersonType.NATURAL_PERSON;
 import static org.springframework.http.HttpStatus.*;
@@ -148,6 +147,7 @@ public class IdPMainController {
         addPersonAttributes(model, naturalPerson);
 
         if (isLegalPersonRequest) {
+            request.getSession().invalidate();
             HttpSession session = request.getSession(true);
             session.setAttribute("naturalPerson", naturalPerson);
             session.setAttribute("samlRequest", authenticationRequest);
@@ -351,6 +351,7 @@ public class IdPMainController {
         }
 
         if (cacheItem.isLegalPersonRequest()) {
+            request.getSession().invalidate();
             HttpSession session = request.getSession(true);
             session.setAttribute("naturalPerson", naturalPerson);
             session.setAttribute("samlRequest", cacheItem.getSamlRequest());
@@ -441,6 +442,7 @@ public class IdPMainController {
                 addPersonAttributes(model, naturalPerson);
                 addLegalPersonAttributes(model, selectedLegalPerson.get());
                 LOG.debug("/confirm_legal_person request complete");
+                StatisticsLogger.logEvent(LEGAL_PERSON_REPRESENTATIVE, LEGAL_PERSON_SELECTION_SUCCESSFUL, MID, authenticationRequest.getOriginCountryCode());
                 return "authorize";
             } else {
                 throw new IllegalStateException("No legal person found with this id '" + legalPersonId + "'");

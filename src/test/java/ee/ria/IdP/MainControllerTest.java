@@ -428,7 +428,8 @@ public class MainControllerTest {
 
         assertSessionCleanup(mockRequest);
 
-        assertEquals("statistics log contains invalid number of records", 0, statisticsLogAppender.getOutput().size());
+        assertEquals("statistics log contains invalid number of records", 1, statisticsLogAppender.getOutput().size());
+        assertEquals("{\"personType\":\"LEGAL_PERSON_REPRESENTATIVE\",\"eventType\":\"LEGAL_PERSON_SELECTION_SUCCESSFUL\",\"authType\":\"MID\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(0).getMessage().getFormattedMessage());
     }
 
     private void assertSessionCleanup(MockHttpServletRequest mockRequest) {

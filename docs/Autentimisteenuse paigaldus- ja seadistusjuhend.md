@@ -173,7 +173,7 @@ Logitava JSON kirje formaat on järgmine:
 | Atribuut          | Kirjeldus |
 | :---------------- | :-------- |
 | `personType` | Autenditava isiku tüüp. Võimalikud väärtused: `NATURAL_PERSON` - füüsiline isik või `LEGAL_PERSON_REPRESENTATIVE` - füüsiline isik, kes esindab juriidilist isikut  |
-| `eventType` | Sündmuse liik. Võimalikud väärtused: `AUTHENTICATION_STARTED`, `AUTHENTICATION_SUCCESSFUL`, `AUTHENTICATION_FAILED` |
+| `eventType` | Sündmuse liik. Võimalikud väärtused: `AUTHENTICATION_STARTED`, `AUTHENTICATION_SUCCESSFUL`, `AUTHENTICATION_FAILED`, `LEGAL_PERSON_SELECTION_SUCCESSFUL` |
 | `authType` | Kasutaja tuvastamiseks kasutatud autentimisvahendi tüüp. Võimalikud väärtused: `ID_CARD`, `MID` |
 | `country` | Autentimise algatanud riigi kood. Peab vastama mustrile `^A-Z{2,2}$` |
 | `error` | Vea kood. Täidetud ainult juhul kui `eventType` väärtus on `AUTHENTICATION_FAILED` |
