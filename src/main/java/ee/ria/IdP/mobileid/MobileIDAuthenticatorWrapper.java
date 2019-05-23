@@ -18,7 +18,7 @@ public class MobileIDAuthenticatorWrapper extends MobileIDAuthenticator {
     }
 
     public MobileIDSession startLogin(String personalCode, String phone) {
-        return super.startLogin(personalCode, null, phone);
+        return super.startLogin(personalCode, null, "+372" + phone);
     }
 
 }

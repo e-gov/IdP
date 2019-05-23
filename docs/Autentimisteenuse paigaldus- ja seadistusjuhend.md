@@ -39,13 +39,13 @@ Autentimisteenus ootab päises _SSL_CLIENT_CERT_ kliendi sertifikaati PEM kodeer
 Autentimisteenust konfigureeritakse kontekstiparameetrite kaudu. Tomcatile sobiv näidiskonfiguratsioon on failis IdP.xml. Konfiguratsiooniparameetrid on järgmised:
 
 | Parameeter | Kirjeldus |
-|:-|:-|
+|:----|:----|
 |BaseUrl|URL nii nagu autentimisteenus on nähtav lõppkasutajatele, näiteks "https://eeidp.ria.ee"|
 |KeystoreFile|Autentimisteenuse võtmehoidla asukoht, võtmehoidla peab olema jks formaadis.|
 |KeystorePassword|Võtmehoidla ja hoidlas olevate võtmete parool.|
 |TokenExpiration|Mobiil-ID sessiooni aegumise kestus sekundites.|
 |DigiDocServiceUrl|Mobiil-ID teenuse URL. Testkeskkonna url on "https://tsp.demo.sk.ee".|
-|DigiDocServiceName|Mobiil-ID teenuse nimi, tesimisel saab kasutatada väärtust "Testimine".|
+|DigiDocServiceName|Mobiil-ID teenuse nimi, testimisel saab kasutatada väärtust "Testimine".|
 
 Järgnevate parameetrite väärtuseid kasutatakse autentimisteenuse metaandmetes. Kõik väärtused on nõutavad.
 
@@ -64,6 +64,25 @@ Järgnevate parameetrite väärtuseid kasutatakse autentimisteenuse metaandmetes
 	OrganizationName
 	OrganizationDisplayName
 	OrganizationUrl
+	
+
+Järgnevate parameetrite väärtuseid kasutatakse juriidiliste isikute pärimiseks üle X-tee. Kõik parameetrid on kohustuslikud, kui ei ole kirjelduses väidetud vastupidist.
+
+| Parameeter | Kirjeldus |
+|:----|:----|
+|XroadServerUrl| X-tee turvaserveri URL. |
+|XroadServerConnectTimeoutInMilliseconds| X-tee turvaserveriga ühendumise aegumise piirmäär. Mittekohustuslik parameeter, vaikimisi 3000 |
+|XroadServerReadTimeoutInMilliseconds| X-tee turvaserverist vastuse lugemise aegumise piirmäär. Mittekohustuslik parameeter, vaikimisi 3000 |
+|XRoadClientSubSystemRoadInstance| Liituja X-tee keskkonna kood. |
+|XRoadClientSubSystemMemberClass| Liituja X-tee liikmeklass. |
+|XRoadClientSubSystemMemberCode| Liituja asutuse X-tee registrikood.  |
+|XRoadClientSubSystemSubsystemCode| Liituja asutuse alamsüsteemi nimi. |
+|XRoadServiceRoadInstance| Kasutatava X-tee teenuse pakkuja keskkonna kood. |
+|XRoadServiceMemberClass| Kasutatava X-tee teenuse pakkuja liikmeklass |
+|XRoadServiceMemberCode| Kasutatava X-tee teenuse pakkuja liikme registrikood. |
+|XRoadServiceSubsystemCode| Kasutatava X-tee teenuse alamsüsteemi nimi. |
+|XRoadEsindusv2AllowedTypes| Lubatud juriidiliste isikute tüübid komaga eraldatult (näiteks: OÜ,AS). <br><br>Koodid peavad vastama äriregistri esindus_v2 vastuses leitud juriidiliste isikute tüübi piirangutele (oiguslik_vorm elemendi sisu alusel). <br><br>Mittekohustuslik parameeter. Vaikimisi kasutatakse järgmist nimekirja: TÜ, UÜ, OÜ, AS, TÜH, SA, MTÜ |
+
 
 ## 4. Autentimisteenuse kasutatavad krüptovõtmed ja sertifikaadid
 
@@ -141,3 +160,34 @@ Et näidiskonfiguratsioon (või ka ise kirjutatud seadistus) rakenduks, tuleb ko
 ```
 export JAVA_OPTS="-Dlog4j2.configurationFile=file:/opt/tomcat/conf/log4j2.xml"
 ```
+
+### 5.3 Statistikalogi
+
+
+Statistikalogi eesmärk on koguda andmeid IdP kasutusstatistika koostamiseks. Statistikalogisse ei salvestata isikuandmeid.
+
+Logikirjes sisalduva `logger` elemendi väärtus on alati `IdpStatistics` ning `message` elemendi sisu logitakse json kujul.
+
+Logitava JSON kirje formaat on järgmine:
+
+| Atribuut          | Kirjeldus |
+| :---------------- | :-------- |
+| `personType` | Autenditava isiku tüüp. Võimalikud väärtused: `NATURAL_PERSON` - füüsiline isik või `LEGAL_PERSON_REPRESENTATIVE` - füüsiline isik, kes esindab juriidilist isikut  |
+| `eventType` | Sündmuse liik. Võimalikud väärtused: `AUTHENTICATION_STARTED`, `AUTHENTICATION_SUCCESSFUL`, `AUTHENTICATION_FAILED`, `LEGAL_PERSON_SELECTION_SUCCESSFUL` |
+| `authType` | Kasutaja tuvastamiseks kasutatud autentimisvahendi tüüp. Võimalikud väärtused: `ID_CARD`, `MID` |
+| `country` | Autentimise algatanud riigi kood. Peab vastama mustrile `^A-Z{2,2}$` |
+| `error` | Vea kood. Täidetud ainult juhul kui `eventType` väärtus on `AUTHENTICATION_FAILED` |
+
+
+Näide: edukas ID-kaardiga autentimine
+````
+{"date":"2019-05-16T13:36:23,380+0000", "level":"INFO", "logger":"IdpStatistics", "thread":"localhost-startStop-1", "instance":"IdP-instance-1", "message":"{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_STARTED\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}"}
+{"date":"2019-05-16T13:37:19,110+0000", "level":"INFO", "logger":"IdpStatistics", "thread":"localhost-startStop-1", "instance":"IdP-instance-1", "message":"{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_SUCCESSFUL\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}"}
+````
+
+Näide: viga ID-kaardiga autentimisel
+````
+{"date":"2019-05-16T13:36:23,380+0000", "level":"INFO", "logger":"IdpStatistics", "thread":"localhost-startStop-1", "instance":"IdP-instance-1", "message":"{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_STARTED\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}"}
+{"date":"2019-05-16T13:36:23,380+0000", "level":"INFO", "logger":"IdpStatistics", "thread":"localhost-startStop-1", "instance":"IdP-instance-1", "message":"{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_FAILED\",\"authType\":\"ID_CARD\",\"country\":\"ET\",\"error\":\"error.idcard.notfound\"}"}
+
+````

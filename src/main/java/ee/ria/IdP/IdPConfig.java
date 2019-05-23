@@ -30,6 +30,8 @@ import ee.ria.IdP.crypto.IdPKeyStore;
 import ee.ria.IdP.crypto.IdPSigner;
 import ee.ria.IdP.eidas.IdPSamlCoreProperties;
 import ee.ria.IdP.metadata.IdPMetadataFetcher;
+import ee.ria.IdP.xroad.EBusinessRegistryService;
+import ee.ria.IdP.xroad.XroadConfigurationImpl;
 import eu.eidas.auth.engine.ProtocolEngine;
 import eu.eidas.auth.engine.ProtocolEngineI;
 import eu.eidas.auth.engine.SamlEngineSystemClock;
@@ -38,13 +40,16 @@ import eu.eidas.auth.engine.configuration.ProtocolEngineConfiguration;
 import eu.eidas.auth.engine.configuration.SamlEngineConfigurationException;
 import eu.eidas.auth.engine.core.eidas.EidasProtocolProcessor;
 import eu.eidas.engine.exceptions.EIDASSAMLEngineException;
+import freemarker.template.TemplateExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
@@ -56,9 +61,11 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Properties;
+
+import static freemarker.template.Configuration.VERSION_2_3_28;
 
 /**
  * Id provider spring configuration class
@@ -196,6 +203,18 @@ public class IdPConfig extends WebMvcConfigurerAdapter {
 
         LOG.info("Created ProtocolEngine instance: {} ", result);
         return result;
+    }
+
+    @Bean
+    public EBusinessRegistryService eBusinessRegistryService(ResourceLoader resourceLoader,
+                                                             XroadConfigurationImpl xroadConfiguration) throws IOException {
+
+        freemarker.template.Configuration freemarkerConfiguration = new freemarker.template.Configuration(VERSION_2_3_28);
+        freemarkerConfiguration.setDirectoryForTemplateLoading(resourceLoader.getResource("classpath:templates").getFile());
+        freemarkerConfiguration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+        freemarkerConfiguration.setDefaultEncoding("UTF-8");
+
+        return new EBusinessRegistryService(freemarkerConfiguration, xroadConfiguration);
     }
 
 

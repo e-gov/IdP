@@ -26,13 +26,16 @@
 package ee.ria.IdP.model;
 
 import ee.ria.IdP.exceptions.InvalidAuthData;
-import ee.ria.IdP.exceptions.InvalidAuthRequest;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.springframework.util.Assert;
+
+import java.io.Serializable;
 
 /**
  * Model object for natural persons
  */
-public class EENaturalPerson {
+public class EENaturalPerson implements Serializable {
     private String familyName;
     private String firstName;
     private String idCode;
@@ -44,6 +47,9 @@ public class EENaturalPerson {
         this.idCode = idCode;
 
         this.birthDate = calcBirthDate();
+        Assert.notNull(this.familyName, "familyName cannot be null");
+        Assert.notNull(this.firstName, "firstName cannot be null");
+        Assert.notNull(this.idCode, "idCode cannot be null");
     }
 
     public String getFamilyName() {
@@ -83,7 +89,7 @@ public class EENaturalPerson {
             int year = Integer.parseInt(idCode.substring(1, 3));
             int month = Integer.parseInt(idCode.substring(3, 5));
             int day = Integer.parseInt(idCode.substring(5, 7));
-            return new DateTime().withDate(century+year,month,day);
+            return new DateTime(DateTimeZone.UTC).withDate(century+year,month,day);
         }
         catch (Exception e) {
             throw new InvalidAuthData("invalid.cert");
