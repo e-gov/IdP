@@ -36,6 +36,7 @@ import ee.ria.IdP.logging.StatisticsLogger;
 import ee.ria.IdP.metadata.MetaDataI;
 import ee.ria.IdP.mobileid.MobileIDAuthI;
 import ee.ria.IdP.model.*;
+import ee.ria.IdP.util.EstonianIdCodeUtil;
 import ee.ria.IdP.xroad.EBusinessRegistryService;
 import eu.eidas.auth.commons.protocol.IAuthenticationRequest;
 import eu.eidas.engine.exceptions.EIDASSAMLEngineException;
@@ -141,6 +142,7 @@ public class IdPMainController {
         } catch (IdCardNotFound idCardNotFound) {
             return fillErrorInfo(model, SAMLRequest, authenticationRequest,idCardNotFound,"error.idcard.notfound", lang);
         } catch (InvalidAuthData invalidAuthData) {
+            LOG.error("ID-Card authentication failed: " + invalidAuthData.getMessage(), invalidAuthData);
             return fillErrorInfo(model, SAMLRequest, authenticationRequest, invalidAuthData, "error.general", lang);
         }
 
@@ -252,7 +254,7 @@ public class IdPMainController {
         );
         String surname = params.get("SURNAME");
         String givenname = params.get("GIVENNAME");
-        String serialnumber = params.get("SERIALNUMBER");
+        String serialnumber = EstonianIdCodeUtil.getEstonianIdCode(params.get("SERIALNUMBER"));
         return new EENaturalPerson(surname,givenname,serialnumber);
     }
 
