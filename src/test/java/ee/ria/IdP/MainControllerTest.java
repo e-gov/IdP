@@ -49,7 +49,32 @@ public class MainControllerTest {
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-    private static final String idcardCert = "-----BEGIN CERTIFICATE----- MIIF3jCCA8agAwIBAgIQL1neZTp6QGVZ/iP/nw1GJzANBgkqhkiG9w0BAQsFADBj MQswCQYDVQQGEwJFRTEiMCAGA1UECgwZQVMgU2VydGlmaXRzZWVyaW1pc2tlc2t1 czEXMBUGA1UEYQwOTlRSRUUtMTA3NDcwMTMxFzAVBgNVBAMMDkVTVEVJRC1TSyAy MDE1MB4XDTE3MTEwNDIwMzMwM1oXDTIxMDMxNTIxNTk1OVowgZUxCzAJBgNVBAYT AkVFMQ8wDQYDVQQKDAZFU1RFSUQxFzAVBgNVBAsMDmF1dGhlbnRpY2F0aW9uMSMw IQYDVQQDDBpBTExLSVZJLEFORFJFUywzNzAwNTA2MDMyMzEQMA4GA1UEBAwHQUxM S0lWSTEPMA0GA1UEKgwGQU5EUkVTMRQwEgYDVQQFEwszNzAwNTA2MDMyMzB2MBAG ByqGSM49AgEGBSuBBAAiA2IABCedqrnxa7v4ishkcafknXY1rOJPiBKDABHKV8H9 7LCPewUgT868tFBmIcuYcg6nTUlJH3QEDTMdRqqyU2t2G8G09QmxvXGc/OLTl1Fs ctYPvknkrNUepi6eibU816W6FaOCAgcwggIDMAkGA1UdEwQCMAAwDgYDVR0PAQH/ BAQDAgOIMFMGA1UdIARMMEowPgYJKwYBBAHOHwEBMDEwLwYIKwYBBQUHAgEWI2h0 dHBzOi8vd3d3LnNrLmVlL3JlcG9zaXRvb3JpdW0vQ1BTMAgGBgQAj3oBAjAiBgNV HREEGzAZgRdhbmRyZXMuYWxsa2l2aUBlZXN0aS5lZTAdBgNVHQ4EFgQU86yJ8ADL 7j0V/3nn13P/168NhUMwIAYDVR0lAQH/BBYwFAYIKwYBBQUHAwIGCCsGAQUFBwME MB8GA1UdIwQYMBaAFLOriLyZ1WKkhSoIzbQdcjuDckdRMGEGCCsGAQUFBwEDBFUw UzBRBgYEAI5GAQUwRzBFFj9odHRwczovL3NrLmVlL2VuL3JlcG9zaXRvcnkvY29u ZGl0aW9ucy1mb3ItdXNlLW9mLWNlcnRpZmljYXRlcy8TAkVOMGoGCCsGAQUFBwEB BF4wXDAnBggrBgEFBQcwAYYbaHR0cDovL2FpYS5zay5lZS9lc3RlaWQyMDE1MDEG CCsGAQUFBzAChiVodHRwOi8vYy5zay5lZS9FU1RFSUQtU0tfMjAxNS5kZXIuY3J0 MDwGA1UdHwQ1MDMwMaAvoC2GK2h0dHA6Ly93d3cuc2suZWUvY3Jscy9lc3RlaWQv ZXN0ZWlkMjAxNS5jcmwwDQYJKoZIhvcNAQELBQADggIBAIiXltGxhtSDaTkaELx4 4T7n8l7AxwzNE4ftk+m7AbU/xCRamxBylNhkSAzZClHESk1Y/2UCA/Fy+ry0ZQCu 9cb+wl1qiPN7fFSXY6UXYfrZEjbvh7HCcPH2J6oPOzqn2mUjcAw9wDJ7mrXwiSR+ 6Pc5IVZX0Gnp8vP4hXRWn8B2f67Ije3OUA3BNZOiF7502Chx1+GHJWCz8iOCiR0t ytybOKSGVn4moUti9bOHb6foLyVwKP9zMi2Qimzfd/9Vggf6ErmQ3rI5r9GoCdX7 uzEXI1W4JM1d4LeRkgutpoicuWObRbm+t3nnk/dTWBgIlbpLxTGmbZ2yZyPbSpHP 6pmvVbFXUhs8I3Fy2dgP1XUj6InW8dzql3zxOg1dd6gK9bMCMwL/acQw12lp/MGT hkCqVmaiOT6Mnp2jr8BP/GcWJukEa2q7unQdY0drP272OJxhnQI3oaROLuo8ZMIQ pkn5suK5+BK0IlwDS/25S7vKBLIVj3d1NPbyhANSsPlQ/ZYlDb2qiX3tl2uSpNam /+8fVokHThOIIYluM1Mc5vmy0Wh7f2FJ1Fvvlk6qBfFnaDukn8hbozI/FUJMLh7t 26jF/HmWOyyqgLB9Ao8uIQ4Z/ZlYEpNCz/EPIFFAeBsJ0PdoL0dycl3Uq75SxYHB 6xeN3wRvP0SHuVAgF/nz0ntd -----END CERTIFICATE----- ";
+    private static final String idcardCert2015 = "-----BEGIN CERTIFICATE----- MIIF3jCCA8agAwIBAgIQL1neZTp6QGVZ/iP/nw1GJzANBgkqhkiG9w0BAQsFADBj MQswCQYDVQQGEwJFRTEiMCAGA1UECgwZQVMgU2VydGlmaXRzZWVyaW1pc2tlc2t1 czEXMBUGA1UEYQwOTlRSRUUtMTA3NDcwMTMxFzAVBgNVBAMMDkVTVEVJRC1TSyAy MDE1MB4XDTE3MTEwNDIwMzMwM1oXDTIxMDMxNTIxNTk1OVowgZUxCzAJBgNVBAYT AkVFMQ8wDQYDVQQKDAZFU1RFSUQxFzAVBgNVBAsMDmF1dGhlbnRpY2F0aW9uMSMw IQYDVQQDDBpBTExLSVZJLEFORFJFUywzNzAwNTA2MDMyMzEQMA4GA1UEBAwHQUxM S0lWSTEPMA0GA1UEKgwGQU5EUkVTMRQwEgYDVQQFEwszNzAwNTA2MDMyMzB2MBAG ByqGSM49AgEGBSuBBAAiA2IABCedqrnxa7v4ishkcafknXY1rOJPiBKDABHKV8H9 7LCPewUgT868tFBmIcuYcg6nTUlJH3QEDTMdRqqyU2t2G8G09QmxvXGc/OLTl1Fs ctYPvknkrNUepi6eibU816W6FaOCAgcwggIDMAkGA1UdEwQCMAAwDgYDVR0PAQH/ BAQDAgOIMFMGA1UdIARMMEowPgYJKwYBBAHOHwEBMDEwLwYIKwYBBQUHAgEWI2h0 dHBzOi8vd3d3LnNrLmVlL3JlcG9zaXRvb3JpdW0vQ1BTMAgGBgQAj3oBAjAiBgNV HREEGzAZgRdhbmRyZXMuYWxsa2l2aUBlZXN0aS5lZTAdBgNVHQ4EFgQU86yJ8ADL 7j0V/3nn13P/168NhUMwIAYDVR0lAQH/BBYwFAYIKwYBBQUHAwIGCCsGAQUFBwME MB8GA1UdIwQYMBaAFLOriLyZ1WKkhSoIzbQdcjuDckdRMGEGCCsGAQUFBwEDBFUw UzBRBgYEAI5GAQUwRzBFFj9odHRwczovL3NrLmVlL2VuL3JlcG9zaXRvcnkvY29u ZGl0aW9ucy1mb3ItdXNlLW9mLWNlcnRpZmljYXRlcy8TAkVOMGoGCCsGAQUFBwEB BF4wXDAnBggrBgEFBQcwAYYbaHR0cDovL2FpYS5zay5lZS9lc3RlaWQyMDE1MDEG CCsGAQUFBzAChiVodHRwOi8vYy5zay5lZS9FU1RFSUQtU0tfMjAxNS5kZXIuY3J0 MDwGA1UdHwQ1MDMwMaAvoC2GK2h0dHA6Ly93d3cuc2suZWUvY3Jscy9lc3RlaWQv ZXN0ZWlkMjAxNS5jcmwwDQYJKoZIhvcNAQELBQADggIBAIiXltGxhtSDaTkaELx4 4T7n8l7AxwzNE4ftk+m7AbU/xCRamxBylNhkSAzZClHESk1Y/2UCA/Fy+ry0ZQCu 9cb+wl1qiPN7fFSXY6UXYfrZEjbvh7HCcPH2J6oPOzqn2mUjcAw9wDJ7mrXwiSR+ 6Pc5IVZX0Gnp8vP4hXRWn8B2f67Ije3OUA3BNZOiF7502Chx1+GHJWCz8iOCiR0t ytybOKSGVn4moUti9bOHb6foLyVwKP9zMi2Qimzfd/9Vggf6ErmQ3rI5r9GoCdX7 uzEXI1W4JM1d4LeRkgutpoicuWObRbm+t3nnk/dTWBgIlbpLxTGmbZ2yZyPbSpHP 6pmvVbFXUhs8I3Fy2dgP1XUj6InW8dzql3zxOg1dd6gK9bMCMwL/acQw12lp/MGT hkCqVmaiOT6Mnp2jr8BP/GcWJukEa2q7unQdY0drP272OJxhnQI3oaROLuo8ZMIQ pkn5suK5+BK0IlwDS/25S7vKBLIVj3d1NPbyhANSsPlQ/ZYlDb2qiX3tl2uSpNam /+8fVokHThOIIYluM1Mc5vmy0Wh7f2FJ1Fvvlk6qBfFnaDukn8hbozI/FUJMLh7t 26jF/HmWOyyqgLB9Ao8uIQ4Z/ZlYEpNCz/EPIFFAeBsJ0PdoL0dycl3Uq75SxYHB 6xeN3wRvP0SHuVAgF/nz0ntd -----END CERTIFICATE-----";
+    private static final String idcardCert2018 = "-----BEGIN CERTIFICATE-----\n"+
+            "MIIERTCCA6agAwIBAgIQdYC8eVbmuPZbdADmNE9pEDAKBggqhkjOPQQDBDBgMQsw\n"+
+            "CQYDVQQGEwJFRTEbMBkGA1UECgwSU0sgSUQgU29sdXRpb25zIEFTMRcwFQYDVQRh\n"+
+            "DA5OVFJFRS0xMDc0NzAxMzEbMBkGA1UEAwwSVEVTVCBvZiBFU1RFSUQyMDE4MB4X\n"+
+            "DTE4MDgxNTEwMzEwMloXDTIzMDgxMjIxNTk1OVowfzELMAkGA1UEBhMCRUUxKjAo\n"+
+            "BgNVBAMMIUrDlUVPUkcsSkFBSy1LUklTVEpBTiwzODAwMTA4NTcxODEQMA4GA1UE\n"+
+            "BAwHSsOVRU9SRzEWMBQGA1UEKgwNSkFBSy1LUklTVEpBTjEaMBgGA1UEBRMRUE5P\n"+
+            "RUUtMzgwMDEwODU3MTgwdjAQBgcqhkjOPQIBBgUrgQQAIgNiAASiTQ+vcXEM1vaY\n"+
+            "cJOcGCY9aT+Wt/vjmG3lhXuyfqQh9bUTLF4H1uk6lrwAxLoDDS1rwJi1a9h47dhB\n"+
+            "W1B+N97ieuB/VPwS76RQah0nEbc7d4pe4STTEgh5R6O2DIeJqd6jggIEMIICADAJ\n"+
+            "BgNVHRMEAjAAMA4GA1UdDwEB/wQEAwIDiDBHBgNVHSAEQDA+MDIGCysGAQQBg5Eh\n"+
+            "AQIBMCMwIQYIKwYBBQUHAgEWFWh0dHBzOi8vd3d3LnNrLmVlL0NQUzAIBgYEAI96\n"+
+            "AQIwHwYDVR0RBBgwFoEUMzgwMDEwODU3MThAZWVzdGkuZWUwHQYDVR0OBBYEFM7x\n"+
+            "TlNCY9g1mkICg78Vc6pH3elyMGEGCCsGAQUFBwEDBFUwUzBRBgYEAI5GAQUwRzBF\n"+
+            "Fj9odHRwczovL3NrLmVlL2VuL3JlcG9zaXRvcnkvY29uZGl0aW9ucy1mb3ItdXNl\n"+
+            "LW9mLWNlcnRpZmljYXRlcy8TAkVOMCAGA1UdJQEB/wQWMBQGCCsGAQUFBwMCBggr\n"+
+            "BgEFBQcDBDAfBgNVHSMEGDAWgBTAhJkpxE6fOwI09pnhClYACCk+ezB/BggrBgEF\n"+
+            "BQcBAQRzMHEwLAYIKwYBBQUHMAGGIGh0dHA6Ly9haWEuZGVtby5zay5lZS9lc3Rl\n"+
+            "aWQyMDE4MEEGCCsGAQUFBzAChjVodHRwczovL3NrLmVlL3VwbG9hZC9maWxlcy9U\n"+
+            "RVNUX29mX0VTVEVJRDIwMTguZGVyLmNydDAzBgNVHR8ELDAqMCigJqAkhiJodHRw\n"+
+            "Oi8vYy5zay5lZS90ZXN0X2VzdGVpZDIwMTguY3JsMAoGCCqGSM49BAMEA4GMADCB\n"+
+            "iAJCAIf6HWB8HTwysJp1mT3rk6iuyhoLGP0roXK/Z/w59Lv4p2JfHt5Z/2FC3RI4\n"+
+            "4t/N+6VgG6khvlhkNt6THBZaYZoVAkIBFEuOoHXKc2vGt3cbcmOeQS69TKX0zVW+\n"+
+            "dzUWk8LIh9ym38adrjvobg0HSuXQAInc4VpDxzfj0+hebIhVDbA84/0=\n"+
+            "-----END CERTIFICATE-----\n";
 
     @Before
     public void setup() {
@@ -79,10 +104,27 @@ public class MainControllerTest {
     }
 
     @Test
-    public void idauthSuccess() throws InvalidAuthRequest {
+    public void idauth2015Success() throws InvalidAuthRequest {
         MockHttpServletRequest mockRequest = new MockHttpServletRequest();
         mockRequest.addHeader("SSL_CLIENT_VERIFY", "SUCCESS");
-        mockRequest.addHeader( "SSL_CLIENT_CERT", idcardCert);
+        mockRequest.addHeader( "SSL_CLIENT_CERT", idcardCert2015);
+
+        Model mockModel = new ExtendedModelMap();
+        String view = idPMainController.authenticate(mockRequest, "not_used_by_mock", null, mockModel );
+        assertEquals("authorize", view);
+        assertTrue(mockModel.containsAttribute("SAMLResponse"));
+        assertEquals("mock_response", mockModel.asMap().get("SAMLResponse"));
+
+        assertEquals("statistics log contains invalid number of records", 2, statisticsLogAppender.getOutput().size());
+        assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_STARTED\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(0).getMessage().getFormattedMessage());
+        assertEquals("{\"personType\":\"NATURAL_PERSON\",\"eventType\":\"AUTHENTICATION_SUCCESSFUL\",\"authType\":\"ID_CARD\",\"country\":\"ET\"}", statisticsLogAppender.getOutput().get(1).getMessage().getFormattedMessage());
+    }
+
+    @Test
+    public void idauth2018Success() throws InvalidAuthRequest {
+        MockHttpServletRequest mockRequest = new MockHttpServletRequest();
+        mockRequest.addHeader("SSL_CLIENT_VERIFY", "SUCCESS");
+        mockRequest.addHeader( "SSL_CLIENT_CERT", idcardCert2018);
 
         Model mockModel = new ExtendedModelMap();
         String view = idPMainController.authenticate(mockRequest, "not_used_by_mock", null, mockModel );
@@ -108,7 +150,7 @@ public class MainControllerTest {
 
         MockHttpServletRequest httpServletRequest = new MockHttpServletRequest();
         httpServletRequest.addHeader("SSL_CLIENT_VERIFY", "SUCCESS");
-        httpServletRequest.addHeader( "SSL_CLIENT_CERT", idcardCert);
+        httpServletRequest.addHeader( "SSL_CLIENT_CERT", idcardCert2015);
 
         Model mockModel = new ExtendedModelMap();
         String view = idPMainController.authenticate(httpServletRequest, "not_used_by_mock", null, mockModel );
@@ -129,7 +171,7 @@ public class MainControllerTest {
     @Test(expected = IllegalStateException.class)
     public void idauthFail() throws InvalidAuthRequest {
         MockHttpServletRequest mockRequest = new MockHttpServletRequest();
-        mockRequest.addHeader( "SSL_CLIENT_CERT", idcardCert);
+        mockRequest.addHeader( "SSL_CLIENT_CERT", idcardCert2015);
 
         Model mockModel = new ExtendedModelMap();
         try {
