@@ -70,7 +70,7 @@ Järgnevate parameetrite väärtuseid kasutatakse juriidiliste isikute pärimise
 
 | Parameeter | Kirjeldus |
 |:----|:----|
-|XroadServerUrl| X-tee turvaserveri URL. |
+|XroadServerUrl| X-tee turvaserveri URL. HTTP otspunkti täispikk url, millel X-tee turvaserver teenindab X-tee päringuid. Näide: `https://localhost/cgi-bin/consumer_proxy` |
 |XroadServerConnectTimeoutInMilliseconds| X-tee turvaserveriga ühendumise aegumise piirmäär. Mittekohustuslik parameeter, vaikimisi 3000 |
 |XroadServerReadTimeoutInMilliseconds| X-tee turvaserverist vastuse lugemise aegumise piirmäär. Mittekohustuslik parameeter, vaikimisi 3000 |
 |XRoadClientSubSystemRoadInstance| Liituja X-tee keskkonna kood. |
