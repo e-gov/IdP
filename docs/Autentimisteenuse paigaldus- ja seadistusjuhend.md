@@ -109,8 +109,8 @@ Eesti id provider on ehitatud nii, et logimine on täielikult välise konteineri
 
 ### 5.2 Näidiskonfiguratsioon
 
-Projekti repositooriumis on näidiskonfiguratsioonifail [log4j2.xml](../log4j2.xml), mis seadistab log4j2 logima vaikimisi _/opt/tomcat/logs/IdP.log_ faili paketis _ee.ria.IdP_ aset leidvad sündmused `INFO` tasemel ning kõik muu `WARN` tasemel.
-Logifailide _roll-over_ toimub iga päev, faili mahupiirangu (100 MB) ületatamisel või siis, kui rakendus taaskäivitatakse. Eelnevad failid pakitakse `gz` formaati ning tõstetakse kausta, mille nimi vastab `yyyy-MM` kuupäevaformaadile.
+Projekti repositooriumis on näidiskonfiguratsioonifail [log4j2.xml](../log4j2.xml), mis seadistab log4j2 logima vaikimisi _mis logib kohaliku failisüsteemi `/var/log/idp` kausta failid mustriga `IdP-%d{yyyy-MM-dd}`, näiteks `/var/log/idp/IdP-2019-08-06.log`. Rakendus hoiab viimase 7 päeva logisid pakkimata kujul. 
+Paketis _ee.ria.IdP_ aset leidvad sündmused logtaikse `INFO` tasemel ning kõik muu `WARN` tasemel.
 
 Logikirjed vormindatakse JSON kujul eraldatuna reavahesümboliga `\n` ning nad sisaldavad järgmisi välju:
 
