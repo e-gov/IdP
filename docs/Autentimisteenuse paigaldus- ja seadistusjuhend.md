@@ -99,6 +99,8 @@ Ilma privaatvõtmeta sertifikaadid mille aliased on kujul:
 
 _eidas_encrypt_CC_, kus CC  on ISO 3166-1 alpha-2 alusel vastava riigi kood - vastavasse riiki saadetavate sõnumite krüpteerimiseks mõeldud sertifikaadid. Tasub meeles pidada, et krüpteerimissertifikaat võib olla määratud ka teise osapoole metaandmetes, võtmehoidlas olevaid võtmeid kasutatakse ainult siis, kui metaandmetes pole sertifikaati määratud.
 
+NB! Väliste teenuste (DDS teenus ja X-tee turvaserver) HTTPS sertifikaatide usaldamiseks kasutatakse vaikimisi [Java platvormi usaldushoidlat](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html#CustomizingStores). Väliste teenuste https sertifikaatide usaldamiseks tuleb rakendusserveri käivitamisel ette anda usaldushoidla asukoht ja salasõna (`javax.net.ssl.trustStore` ja `javax.net.ssl.trustStorePassword` parameetritega) või lisada väliste teenuste HTTPS sertifikaadid Java virtuaalmasina enda usaldushoidlasse (cacerts)
+
 ## 5. Logimine
 
 Logimiseks kasutatakse SLF4J teeki. Logi konfiguratsioon tuleb ette anda väljastpoolt. Vajalikud teegid ja konfiguratsioonifailid ei sisaldu tarnitavas _war_ failis. eIDASe klasside paki nimed algavad "_eu.eidas_" ja id provideri enda klasside pakid ee.ria.IdP.
