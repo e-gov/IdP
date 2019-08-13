@@ -99,6 +99,8 @@ Ilma privaatvõtmeta sertifikaadid mille aliased on kujul:
 
 _eidas_encrypt_CC_, kus CC  on ISO 3166-1 alpha-2 alusel vastava riigi kood - vastavasse riiki saadetavate sõnumite krüpteerimiseks mõeldud sertifikaadid. Tasub meeles pidada, et krüpteerimissertifikaat võib olla määratud ka teise osapoole metaandmetes, võtmehoidlas olevaid võtmeid kasutatakse ainult siis, kui metaandmetes pole sertifikaati määratud.
 
+NB! Väliste teenuste (DDS teenus ja X-tee turvaserver) HTTPS sertifikaatide usaldamiseks kasutatakse vaikimisi [Java platvormi usaldushoidlat](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html#CustomizingStores). Väliste teenuste https sertifikaatide usaldamiseks tuleb rakendusserveri käivitamisel ette anda usaldushoidla asukoht ja salasõna (`javax.net.ssl.trustStore` ja `javax.net.ssl.trustStorePassword` parameetritega) või lisada väliste teenuste HTTPS sertifikaadid Java virtuaalmasina enda usaldushoidlasse (cacerts)
+
 ## 5. Logimine
 
 Logimiseks kasutatakse SLF4J teeki. Logi konfiguratsioon tuleb ette anda väljastpoolt. Vajalikud teegid ja konfiguratsioonifailid ei sisaldu tarnitavas _war_ failis. eIDASe klasside paki nimed algavad "_eu.eidas_" ja id provideri enda klasside pakid ee.ria.IdP.
@@ -109,8 +111,8 @@ Eesti id provider on ehitatud nii, et logimine on täielikult välise konteineri
 
 ### 5.2 Näidiskonfiguratsioon
 
-Projekti repositooriumis on näidiskonfiguratsioonifail [log4j2.xml](../log4j2.xml), mis seadistab log4j2 logima vaikimisi _/opt/tomcat/logs/IdP.log_ faili paketis _ee.ria.IdP_ aset leidvad sündmused `INFO` tasemel ning kõik muu `WARN` tasemel.
-Logifailide _roll-over_ toimub iga päev, faili mahupiirangu (100 MB) ületatamisel või siis, kui rakendus taaskäivitatakse. Eelnevad failid pakitakse `gz` formaati ning tõstetakse kausta, mille nimi vastab `yyyy-MM` kuupäevaformaadile.
+Projekti repositooriumis on näidiskonfiguratsioonifail [log4j2.xml](../log4j2.xml), mis seadistab log4j2 logima vaikimisi _mis logib kohaliku failisüsteemi `/var/log/idp` kausta failid mustriga `IdP-%d{yyyy-MM-dd}`, näiteks `/var/log/idp/IdP-2019-08-06.log`. Rakendus hoiab viimase 7 päeva logisid pakkimata kujul. 
+Paketis _ee.ria.IdP_ aset leidvad sündmused logtaikse `INFO` tasemel ning kõik muu `WARN` tasemel.
 
 Logikirjed vormindatakse JSON kujul eraldatuna reavahesümboliga `\n` ning nad sisaldavad järgmisi välju:
 
