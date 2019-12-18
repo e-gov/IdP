@@ -9,6 +9,7 @@ import ee.ria.IdP.metadata.MetaDataConfigurationImpl;
 import eu.eidas.auth.commons.protocol.IAuthenticationRequest;
 import eu.eidas.auth.engine.ProtocolEngineI;
 import eu.eidas.auth.engine.metadata.MetadataUtil;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -55,6 +56,7 @@ public class IdPEncryptionTest {
     }
 
     @Test
+    @Ignore
     public void testRequestParse() throws Exception {
         String request = "PHNhbWwycDpBdXRoblJlcXVlc3QgeG1sbnM6c2FtbDJwPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6cHJvdG9jb" +
                 "2wiIHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIiB4bWxuczplaWRhcz0iaHR0cDovL2VpZGFzLmV" +
